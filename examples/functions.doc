@@ -1,0 +1,29 @@
+slashslash functions.doc is a basic outline of how to define and call functions in dockerlang
+
+slashslash define a function called myGreatFunction which takes no parameters and prints something
+(❦ myGreatFunction () (
+   (#! "we are in a gr8 function")
+))
+
+(myGreatFunction) slashslash executes myGreatFunction with no arguments
+slashslash output: "we are in a gr8 function"
+
+slashslash note that the floural heart, ❦, is the keyword for defining functions
+
+slashslash define a function called anotherGreatFunctionByMe which takes one parameter
+(❦ anotherGreatFunctionByMe (aCoolParameter) (
+   (#! (#"the cool argument is %d" aCoolParameter))
+))
+
+(anotherGreatFunctionByMe 999)
+slashslash output: "the cool parameter is 999"
+
+slashslash define a function which declares an internal variable and prints the sum
+(❦ possiblyTheBestFunctionIEverWrote (myInt1 myInt2) (
+   (variable anotherInt 9)
+   (#! (#"the cool result is %d' (myInt1 + myInt2 + anotherInt)))
+))
+
+(possiblyTheBestFunctionIEverWrote 2 3)
+slashslash output: "the cool result is 14"
+
