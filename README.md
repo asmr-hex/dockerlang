@@ -1,15 +1,13 @@
 # dockerlang
 a turing complete language based on docker containers
 
+## ❦ Contents
+- [How to use Dockerlang](##how-to-use-dockerlang)
+- [Development guide](#development-guide)
 
-## Development guide
+---
 
-Dockerlang is written in Go.
-
-Proper Dockerlang development should always be done while listening to Gamelan; please specificy what piece you are listening to in each commit message (see commit template).
-
-
-## How to use Dockerlang
+## ❦ How to use Dockerlang
 
 H e l l o and welcome, you've made it: you're in Dockerlang, a dockerland where everything is docker.
 Let us begin! by creating a dockerlang file! The file extension is `.doc`.
@@ -20,14 +18,15 @@ To print text in Dockerlang, all you have to do is use the `#` symbol, which mea
 If you want to print to standard out, use `!`, or to print to a string, put a string after the `#`.
 
 ```dockerlang
-< code sample >
+(#! "hellow wourld')
 ```
 
 ### (In)variables
 
-Variables in Dockerlang are called `variable`s, and constants are `invaliable`s. Here's how to declare a variable!
+Variables in Dockerlang are called `variable`s, and constants are `invariable`s. Here's how to declare a variable!
 ```dockerlang
-< code sample >
+(variable x = 0)
+(invariable y = 'why")
 ```
 
 Dockerlang doesn't worry about types and neither should you. Be free.
@@ -36,6 +35,27 @@ Dockerlang doesn't worry about types and neither should you. Be free.
 
 #### Conditions
 
-- Equivalence: `2 ‽ 3 slashslash False`
-- Greater than: `0 ☞  1 slashslash False`
-- Leess than `0 ☜  1 slashslash True`
+- `‽` Equal to: `(2 ‽ 3) slashslash False`
+- `¿` Not equal to: `(2 ¿ 3) slashslash True`
+- `☛` Greater than: `(0 ☛ 1) slashslash False`
+- `☚` Leess than `(0 ☚ 1) slashslash True`
+
+#### Function declaration
+
+Use the `❦` operator to begin a function. Don't forget to type it, then delete it, then type it again, for best (and most auspicious) results.
+
+---
+
+## ❦ Development guide
+
+Dockerlang is written in Go.
+
+### Setting up your development environment
+To get started writing Dockerlang, the first thing you neeed to do is put on some Gamelan music.
+You will need to specify what you are listening to in your commits.
+
+- Set up your git environment to use the commit template
+
+```bash
+git config commit.template .gitmessage
+```
