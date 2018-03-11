@@ -1,0 +1,8 @@
+slashslash hello.doc is a basic hellow world program written in dockerlang
+slashslash this is a comment (sorry no multiline ¯\_(ツ)_/¯)
+
+slashslash print to stdout nothing fancy
+(#! "hell wurld")
+
+slashslash print to stdout with string formatting
+(#! (#"hello %s" "connor"))
