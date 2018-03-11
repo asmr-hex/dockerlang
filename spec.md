@@ -1,0 +1,25 @@
+# Dockerlang spec
+
+- Format
+    - Dockerlang file extension is `.doc`
+    - All operations and function calls in Dockerlang are performed by Docker containers
+- Syntax
+    - Lispish I guess
+- Operators
+    - `+`
+    - `-`
+    - `/`
+    - `*`
+    - `%`
+    - `^`
+    - `|`
+    - `&`
+    - `||`
+    - `&&`
+- Variables and types
+    - String
+    - Bool
+    - Int
+    - Float
+    - List
+    - Map
