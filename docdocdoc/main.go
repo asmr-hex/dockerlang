@@ -22,22 +22,30 @@ usage:
 )
 
 func main() {
-	// parse commandline flags
-	conf := &dockerlang.Config{}
-	ParseArgs(conf)
-
-	// beging lexing and parsing
-	err := dockerlang.Compile(conf)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func ParseArgs(c *dockerlang.Config) error {
 	var (
 		err error
 	)
 
+	conf := &dockerlang.Config{}
+
+	err = ParseArgs(conf)
+	if err != nil {
+		fmt.Println(err.Error())
+
+		fmt.Println(UsageStr)
+
+		return
+	}
+
+	err = dockerlang.Compile(conf)
+	if err != nil {
+		fmt.Println(err.Error())
+
+		return
+	}
+}
+
+func ParseArgs(c *dockerlang.Config) error {
 	// define flags
 	flag.BoolVar(&c.ShowUsage, "help", false, UsageStr)
 
@@ -49,12 +57,7 @@ func ParseArgs(c *dockerlang.Config) error {
 
 	// ensure that a source file has been provided
 	if len(args) == 0 {
-		err = fmt.Errorf("no source file has been provided :(")
-
-		fmt.Println(err.Error())
-		fmt.Println(UsageStr)
-
-		return err
+		return fmt.Errorf("no source file has been provided :(")
 	}
 
 	// assume the first arg is the source file
@@ -63,6 +66,8 @@ func ParseArgs(c *dockerlang.Config) error {
 	// validate flags
 	if c.ShowUsage {
 		fmt.Println(UsageStr)
+
+		return nil
 	}
 
 	return nil

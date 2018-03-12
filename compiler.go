@@ -1,5 +1,9 @@
 package dockerlang
 
+import (
+	"os"
+)
+
 type Config struct {
 	ShowUsage   bool
 	SrcFileName string
@@ -29,8 +33,16 @@ func Compile(c *Config) error {
 
 func (c *Compiler) ReadSource() error {
 	// check to see if provided file exists
+	info, err := os.Stat(c.Config.SrcFileName)
+	if err != nil {
+		return err
+	}
+
+	// TODO check filesize and permissions of file
+	_ = info
 
 	// stream file in loop
+	// bufio.
 
 	//
 
