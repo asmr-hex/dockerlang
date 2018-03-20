@@ -37,7 +37,7 @@ func main() {
 		return
 	}
 
-	err = dockerlang.Compile(conf)
+	err = dockerlang.Compterpret(conf)
 	if err != nil {
 		fmt.Println(err.Error())
 
