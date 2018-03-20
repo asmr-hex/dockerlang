@@ -1,4 +1,5 @@
-# dockerlang
+# dockerlang [![Build Status](https://travis-ci.org/connorwalsh/dockerlang.svg?branch=dev)](https://travis-ci.org/connorwalsh/dockerlang)
+
 a turing complete language based on docker containers
 
 ## ❦ Contents
