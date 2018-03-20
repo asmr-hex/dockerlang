@@ -13,7 +13,7 @@ func TestMain(m *testing.M) {
 
 func TestLoadSourceCode_NoSuchFile(t *testing.T) {
 	conf := &Config{SrcFileName: "nonexistent_test_src.doc"}
-	compt := &Compterpreter{Config: conf}
+	compt := NewCompterpreter(conf)
 
 	err := compt.LoadSourceCode()
 	if err == nil {
@@ -23,7 +23,7 @@ func TestLoadSourceCode_NoSuchFile(t *testing.T) {
 
 func TestLoadSourceCode(t *testing.T) {
 	conf := &Config{SrcFileName: "test/test.doc"}
-	compt := &Compterpreter{Config: conf}
+	compt := NewCompterpreter(conf)
 
 	err := compt.LoadSourceCode()
 	if err != nil {
@@ -33,7 +33,7 @@ func TestLoadSourceCode(t *testing.T) {
 
 func TestTokenizeNumber(t *testing.T) {
 	conf := &Config{SrcFileName: "test/test.doc"}
-	compt := &Compterpreter{Config: conf}
+	compt := NewCompterpreter(conf)
 
 	err := compt.LoadSourceCode()
 	if err != nil {
@@ -52,7 +52,7 @@ func TestTokenizeNumber(t *testing.T) {
 
 func TestGetNextToken(t *testing.T) {
 	conf := &Config{SrcFileName: "test/test.doc"}
-	compt := &Compterpreter{Config: conf}
+	compt := NewCompterpreter(conf)
 
 	err := compt.LoadSourceCode()
 	if err != nil {
@@ -76,5 +76,45 @@ func TestGetNextToken(t *testing.T) {
 	}
 	if s != "5678" {
 		t.Errorf("incorrect second token! Expected '5678' got '%s'", s)
+	}
+}
+
+func TestIsOperator(t *testing.T) {
+	conf := &Config{SrcFileName: "test/test.doc"}
+	compt := NewCompterpreter(conf)
+	for _, operator := range []rune{'+', '†', '*', '‡', '%'} {
+		ok := compt.IsOperator(operator)
+		if !ok {
+			t.Error("not an operator! but it should be!")
+		}
+	}
+	for _, operator := range []rune{'q', '!', '❧', '0', ' '} {
+		ok := compt.IsOperator(operator)
+		if ok {
+			t.Error("that was an operator! but it shouldn't be!")
+		}
+	}
+}
+
+func TestTokenizeOperator(t *testing.T) {
+	conf := &Config{SrcFileName: "test/test-operators.doc"}
+	compt := NewCompterpreter(conf)
+
+	err := compt.LoadSourceCode()
+	if err != nil {
+		t.Error(err)
+	}
+
+	compt.Advance()
+	// advance ptr to first character
+	for _, op := range []string{"‡", "*", "+", "%", "†"} {
+		compt.CurrentToken = ""
+		compt.TokenizeOperator(compt.CurrentChar)
+		if string(compt.CurrentChar) == "EOF" {
+			break
+		}
+		if compt.CurrentToken != op {
+			t.Error("incorrect token")
+		}
 	}
 }

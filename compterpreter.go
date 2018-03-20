@@ -20,27 +20,31 @@ type Compterpreter struct {
 	Scanner      scanner.Scanner
 	CurrentChar  rune
 	CurrentToken string
+	Symbols      *Symbols
 	Tokens       []string
 }
 
-func Compterpret(c *Config) error {
+func NewCompterpreter(c *Config) *Compterpreter {
+	return &Compterpreter{
+		Config:  c,
+		Symbols: PopulateSymbols(),
+	}
+}
+
+func (c *Compterpreter) Compterpret() error {
 	var (
 		err error
 	)
 
-	compterpreter := &Compterpreter{
-		Config: c,
-	}
-
 	// initialize a scanner to read through source code character
 	// by character
-	err = compterpreter.LoadSourceCode()
+	err = c.LoadSourceCode()
 	if err != nil {
 		return err
 	}
 
 	// start interpreting
-	err = compterpreter.Interpret()
+	err = c.Interpret()
 	if err != nil {
 		return err
 	}
@@ -91,10 +95,9 @@ func (c *Compterpreter) GetNextToken() (string, error) {
 			// igfnore whitespace
 			c.Advance()
 			continue
-		// case c.IsOperator(c.CurrentChar):
-		// 	// something
-		// 	c.TokenizeOperator()
-		// 	done = true
+		case c.IsOperator(c.CurrentChar):
+			// something
+			c.TokenizeOperator(c.CurrentChar)
 		case c.IsNumber(c.CurrentChar):
 			// get full multidigit number token
 			c.TokenizeNumber(c.CurrentChar)
@@ -127,6 +130,15 @@ func (c *Compterpreter) IsNumber(r rune) bool {
 	return unicode.IsDigit(r)
 }
 
+func (c *Compterpreter) IsOperator(r rune) bool {
+	for _, symbol := range c.Symbols.Operators {
+		if string(r) == symbol {
+			return true
+		}
+	}
+	return false
+}
+
 func (c *Compterpreter) TokenizeNumber(r rune) {
 	c.CurrentToken = c.CurrentToken + string(r)
 
@@ -138,6 +150,23 @@ func (c *Compterpreter) TokenizeNumber(r rune) {
 	}
 }
 
-func (c *Compterpreter) Advance() {
+func (c *Compterpreter) TokenizeOperator(r rune) {
+	c.CurrentToken = c.CurrentToken + string(r)
+	c.Advance()
+	// TODO: for a bright future which containts multi-symbol operators
+	//if c.IsOperator(c.CurrentChar) {
+	//	// check if the proposed multi-symbol operator is valid
+	//	// if it's not, it's two operators next to each other
+	//	c.TokenizeOperator(c.CurrentChar)
+	//}
+}
+
+func (c *Compterpreter) Advance() bool {
 	c.CurrentChar = c.Scanner.Next()
+
+	if string(c.CurrentChar) == "EOF" {
+		return false
+	}
+
+	return true
 }
