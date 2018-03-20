@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
 	"text/scanner"
+	"unicode"
 )
 
 type Config struct {
@@ -28,11 +28,19 @@ func Compterpret(c *Config) error {
 		err error
 	)
 
-	compiler := &Compterpreter{
+	compterpreter := &Compterpreter{
 		Config: c,
 	}
 
-	err = compiler.ReadSource()
+	// initialize a scanner to read through source code character
+	// by character
+	err = compterpreter.LoadSourceCode()
+	if err != nil {
+		return err
+	}
+
+	// start interpreting
+	err = compterpreter.Interpret()
 	if err != nil {
 		return err
 	}
@@ -40,7 +48,7 @@ func Compterpret(c *Config) error {
 	return nil
 }
 
-func (c *Compterpreter) ReadSource() error {
+func (c *Compterpreter) LoadSourceCode() error {
 	// check to see if provided file exists
 	info, err := os.Stat(c.Config.SrcFileName)
 	if err != nil {
@@ -56,29 +64,33 @@ func (c *Compterpreter) ReadSource() error {
 		return err
 	}
 
-	// stream file in loop
+	// set source code scanner
 	reader := bufio.NewReader(fd)
 	c.Scanner.Init(reader)
-
-	c.Advance()
-
-	t := c.GetNextToken()
-
-	fmt.Println(t)
 
 	return nil
 }
 
-func (c *Compterpreter) GetNextToken() string {
-	var (
-		done = false
-	)
+func (c *Compterpreter) Interpret() error {
+	// starting off from the beginning of the source file we will
+	// always first advance to the first character.
+	c.Advance()
 
-	for !done {
+	return nil
+}
+
+func (c *Compterpreter) GetNextToken() (string, error) {
+	// we must clear the CurrentToken each time we get the next token!
+	c.CurrentToken = ""
+
+	// we are looping since there are characters we may want to ignore
+	// for example, whitespace or something.
+	for {
 		switch {
-		// case c.IsWhitespace(c.CurrentChar):
-		// 	// igfnore whitespace
-		// 	continue
+		case c.IsWhitespace(c.CurrentChar):
+			// igfnore whitespace
+			c.Advance()
+			continue
 		// case c.IsOperator(c.CurrentChar):
 		// 	// something
 		// 	c.TokenizeOperator()
@@ -86,18 +98,33 @@ func (c *Compterpreter) GetNextToken() string {
 		case c.IsNumber(c.CurrentChar):
 			// get full multidigit number token
 			c.TokenizeNumber(c.CurrentChar)
-			done = true
 		default:
-			done = true
+			// we've encountered something very unexpected!
+			// i'd like to panic, but i'm gunna keep my kewl
+			return "", fmt.Errorf(
+				"sry, but ive NO IDEA wut this char is: %s. Try typing another one(?)",
+				string(c.CurrentChar),
+			)
 		}
+
+		// if we ever get here, we have gotten the next token
+		// and the CurrentChar should be pointing to the next
+		// character we want to start tokenizing!
+		break
 	}
 
-	return c.CurrentToken
+	// currently just returning the CurrentToken (what we just tokenized) and
+	// assuming that the caller is appending the token to an array of seen tokens
+
+	return c.CurrentToken, nil
+}
+
+func (c *Compterpreter) IsWhitespace(r rune) bool {
+	return unicode.IsSpace(r)
 }
 
 func (c *Compterpreter) IsNumber(r rune) bool {
-	_, err := strconv.Atoi(string(r))
-	return err == nil
+	return unicode.IsDigit(r)
 }
 
 func (c *Compterpreter) TokenizeNumber(r rune) {
