@@ -7,6 +7,9 @@ const (
 	DIVISION_OPERATOR       = "‡"
 	MODULO_OPERATOR         = "%"
 	NOOP                    = "NOOP"
+
+	R_PAREN_PUNCTION    = "("
+	L_PAREN_PUNCUTATION = ")"
 )
 
 var (
@@ -22,8 +25,9 @@ var (
 
 // all the language-defined tokens in dockerlang
 type Symbols struct {
-	Operators []string
-	Keywords  []string
+	Operators   []string
+	Keywords    []string
+	Punctuation []string
 }
 
 func PopulateSymbols() *Symbols {
@@ -37,5 +41,9 @@ func PopulateSymbols() *Symbols {
 			NOOP,
 		},
 		Keywords: []string{},
+		Punctuation: []string{
+			R_PAREN_PUNCTION,
+			L_PAREN_PUNCUTATION,
+		},
 	}
 }

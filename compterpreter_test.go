@@ -96,6 +96,23 @@ func TestIsOperator(t *testing.T) {
 	}
 }
 
+func TestIsPunctuation(t *testing.T) {
+	conf := &Config{SrcFileName: "test/test.doc"}
+	compt := NewCompterpreter(conf)
+	for _, operator := range []rune{'(', ')', '(', ')'} {
+		ok := compt.IsPunctuation(operator)
+		if !ok {
+			t.Error("not punctuation! but it should be!")
+		}
+	}
+	for _, operator := range []rune{'q', '!', '❧', '0', ' '} {
+		ok := compt.IsPunctuation(operator)
+		if ok {
+			t.Error("that was puncuation! but it shouldn't be!")
+		}
+	}
+}
+
 func TestTokenizeOperator(t *testing.T) {
 	conf := &Config{SrcFileName: "test/test-operators.doc"}
 	compt := NewCompterpreter(conf)

@@ -51,6 +51,8 @@ func (c *Compterpreter) GetNextToken() (Token, error) {
 		case c.IsNumber(c.CurrentChar):
 			// get full multidigit number token
 			err = c.TokenizeNumber(c.CurrentChar)
+		case c.IsPunctuation(c.CurrentChar):
+			err = c.TokenizePunctuation(c.CurrentChar)
 		default:
 			// we've encountered something very unexpected!
 			// i'd like to panic, but i'm gunna keep my kewl
@@ -82,6 +84,15 @@ func (c *Compterpreter) IsNumber(r rune) bool {
 
 func (c *Compterpreter) IsOperator(r rune) bool {
 	for _, symbol := range c.Symbols.Operators {
+		if string(r) == symbol {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *Compterpreter) IsPunctuation(r rune) bool {
+	for _, symbol := range c.Symbols.Punctuation {
 		if string(r) == symbol {
 			return true
 		}
@@ -133,6 +144,15 @@ func (c *Compterpreter) TokenizeOperator(r rune) error {
 	//	// if it's not, it's two operators next to each other
 	//	c.TokenizeOperator(c.CurrentChar)
 	//}
+	return nil
+}
+
+func (c *Compterpreter) TokenizePunctuation(r rune) error {
+	c.CurrentToken.Type = PUNCTUATION
+	c.CurrentToken.Value = string(r)
+	if err := c.Advance(); err != nil {
+		return err
+	}
 	return nil
 }
 
