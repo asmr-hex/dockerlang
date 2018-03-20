@@ -3,6 +3,7 @@ package dockerlang
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"text/scanner"
 	"unicode"
@@ -76,14 +77,40 @@ func (c *Compterpreter) LoadSourceCode() error {
 }
 
 func (c *Compterpreter) Interpret() error {
-	// starting off from the beginning of the source file we will
-	// always first advance to the first character.
-	c.Advance()
+	c.Tokenize()
+
+	c.Parse()
 
 	return nil
 }
 
+func (c *Compterpreter) Tokenize() error {
+	// starting off from the beginning of the source file we will
+	// always first advance to the first character.
+	c.Advance()
+	for {
+		token, err := c.GetNextToken()
+		// gracefully catch end of file
+		switch err {
+		case io.EOF:
+			return nil
+		default:
+			return err
+		}
+
+		c.Tokens = append(c.Tokens, token)
+	}
+
+	return nil
+}
+
+func (c *Compterpreter) Parse() error {
+	return nil
+}
+
 func (c *Compterpreter) GetNextToken() (string, error) {
+	var err error
+
 	// we must clear the CurrentToken each time we get the next token!
 	c.CurrentToken = ""
 
@@ -93,14 +120,17 @@ func (c *Compterpreter) GetNextToken() (string, error) {
 		switch {
 		case c.IsWhitespace(c.CurrentChar):
 			// igfnore whitespace
-			c.Advance()
+			err = c.Advance()
+			if err != nil {
+				return c.CurrentToken, err
+			}
 			continue
 		case c.IsOperator(c.CurrentChar):
 			// something
-			c.TokenizeOperator(c.CurrentChar)
+			err = c.TokenizeOperator(c.CurrentChar)
 		case c.IsNumber(c.CurrentChar):
 			// get full multidigit number token
-			c.TokenizeNumber(c.CurrentChar)
+			err = c.TokenizeNumber(c.CurrentChar)
 		default:
 			// we've encountered something very unexpected!
 			// i'd like to panic, but i'm gunna keep my kewl
@@ -119,7 +149,7 @@ func (c *Compterpreter) GetNextToken() (string, error) {
 	// currently just returning the CurrentToken (what we just tokenized) and
 	// assuming that the caller is appending the token to an array of seen tokens
 
-	return c.CurrentToken, nil
+	return c.CurrentToken, err
 }
 
 func (c *Compterpreter) IsWhitespace(r rune) bool {
@@ -139,34 +169,43 @@ func (c *Compterpreter) IsOperator(r rune) bool {
 	return false
 }
 
-func (c *Compterpreter) TokenizeNumber(r rune) {
+func (c *Compterpreter) TokenizeNumber(r rune) error {
 	c.CurrentToken = c.CurrentToken + string(r)
 
 	// check to see if we need to include the next character in the
 	// current token
-	c.Advance()
+	if err := c.Advance(); err != nil {
+		return err
+	}
+
 	if c.IsNumber(c.CurrentChar) {
 		c.TokenizeNumber(c.CurrentChar)
 	}
+
+	return nil
 }
 
-func (c *Compterpreter) TokenizeOperator(r rune) {
+func (c *Compterpreter) TokenizeOperator(r rune) error {
 	c.CurrentToken = c.CurrentToken + string(r)
-	c.Advance()
+	if err := c.Advance(); err != nil {
+		return err
+	}
+
 	// TODO: for a bright future which containts multi-symbol operators
 	//if c.IsOperator(c.CurrentChar) {
 	//	// check if the proposed multi-symbol operator is valid
 	//	// if it's not, it's two operators next to each other
 	//	c.TokenizeOperator(c.CurrentChar)
 	//}
+	return nil
 }
 
-func (c *Compterpreter) Advance() bool {
+func (c *Compterpreter) Advance() error {
 	c.CurrentChar = c.Scanner.Next()
 
 	if string(c.CurrentChar) == "EOF" {
-		return false
+		return io.EOF
 	}
 
-	return true
+	return nil
 }

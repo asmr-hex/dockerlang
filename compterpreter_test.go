@@ -118,3 +118,27 @@ func TestTokenizeOperator(t *testing.T) {
 		}
 	}
 }
+
+func TestTokenize(t *testing.T) {
+	conf := &Config{SrcFileName: "test/test_tokenize.doc"}
+	compt := NewCompterpreter(conf)
+
+	err := compt.LoadSourceCode()
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = compt.Tokenize()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedTokens := []string{
+		"123", "†", "3", "*", "2", "‡", "45787894357893", "0", "+", "00", "+", "1",
+	}
+	for idx, token := range compt.Tokens {
+		if token != expectedTokens[idx] {
+			t.Error("Incorrect token! Try harder")
+		}
+	}
+}
