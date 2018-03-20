@@ -105,6 +105,8 @@ func (c *Compterpreter) Tokenize() error {
 }
 
 func (c *Compterpreter) Parse() error {
+	// build the global ASTl, for all expressions in the global scope as part of an implicit anonymous function
+
 	return nil
 }
 
@@ -119,12 +121,14 @@ func (c *Compterpreter) GetNextToken() (string, error) {
 	for {
 		switch {
 		case c.IsWhitespace(c.CurrentChar):
-			// igfnore whitespace
-			err = c.Advance()
-			if err != nil {
+			// igfnore non-linebreak whitespace
+			err = c.TokenizeWhitespace(c.CurrentChar)
+			switch err {
+			case io.EOF:
 				return c.CurrentToken, err
+			case TrivialWhitespaceError:
+				continue
 			}
-			continue
 		case c.IsOperator(c.CurrentChar):
 			// something
 			err = c.TokenizeOperator(c.CurrentChar)
@@ -167,6 +171,19 @@ func (c *Compterpreter) IsOperator(r rune) bool {
 		}
 	}
 	return false
+}
+
+func (c *Compterpreter) TokenizeWhitespace(r rune) error {
+	if r == '\n' {
+		c.CurrentToken = string(r)
+		return nil
+	}
+
+	if err := c.Advance(); err != nil {
+		return err
+	}
+
+	return TrivialWhitespaceError
 }
 
 func (c *Compterpreter) TokenizeNumber(r rune) error {

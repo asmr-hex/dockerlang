@@ -134,7 +134,7 @@ func TestTokenize(t *testing.T) {
 	}
 
 	expectedTokens := []string{
-		"123", "†", "3", "*", "2", "‡", "45787894357893", "0", "+", "00", "+", "1",
+		"\n", "123", "†", "3", "*", "2", "‡", "45787894357893", "\n", "0", "+", "00", "+", "1", "\n",
 	}
 	for idx, token := range compt.Tokens {
 		if token != expectedTokens[idx] {
