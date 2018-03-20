@@ -119,7 +119,7 @@ func TestTokenizeOperator(t *testing.T) {
 	}
 }
 
-func TestLexe(t *testing.T) {
+func TestLex(t *testing.T) {
 	conf := &Config{SrcFileName: "test/test_tokenize.doc"}
 	compt := NewCompterpreter(conf)
 
