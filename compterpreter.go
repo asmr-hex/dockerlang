@@ -77,14 +77,14 @@ func (c *Compterpreter) LoadSourceCode() error {
 }
 
 func (c *Compterpreter) Interpret() error {
-	c.Tokenize()
+	c.Lex()
 
 	c.Parse()
 
 	return nil
 }
 
-func (c *Compterpreter) Tokenize() error {
+func (c *Compterpreter) Lex() error {
 	// starting off from the beginning of the source file we will
 	// always first advance to the first character.
 	c.Advance()
@@ -105,7 +105,8 @@ func (c *Compterpreter) Tokenize() error {
 }
 
 func (c *Compterpreter) Parse() error {
-	// build the global ASTl, for all expressions in the global scope as part of an implicit anonymous function
+	// build the global StackTree, for all expressions in the global scope as part of an implicit anonymous function
+	//var globalStackTree = NewStackTree(c.Config.SrcFileName)
 
 	return nil
 }

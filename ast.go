@@ -1,6 +1,6 @@
 package dockerlang
 
-// each function in Dockerlang will have its own AST of the form:
+// each function in Dockerlang will have its own StackTree of the form:
 //
 //                 function
 //               ______|______
@@ -12,10 +12,18 @@ package dockerlang
 //           /\    /\       Nodes
 //         Nodes  Nodes
 
-type AST struct {
+type StackTree struct {
 	Name  string
 	Scope *Scope
-	Body  *Body
+	AST   *AST
+}
+
+func NewStackTree(name string) *StackTree {
+	return &StackTree{
+		Name:  name,
+		Scope: NewScope(),
+		AST:   NewAST(),
+	}
 }
 
 type Scope struct {
@@ -23,8 +31,19 @@ type Scope struct {
 	Vars []Node
 }
 
-type Body struct {
+func NewScope() *Scope {
+	return &Scope{
+		Args: []Node{},
+		Vars: []Node{},
+	}
+}
+
+type AST struct {
 	Return Node
+}
+
+func NewAST() *AST {
+	return &AST{}
 }
 
 type Node struct {

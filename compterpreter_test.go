@@ -119,7 +119,7 @@ func TestTokenizeOperator(t *testing.T) {
 	}
 }
 
-func TestTokenize(t *testing.T) {
+func TestLexe(t *testing.T) {
 	conf := &Config{SrcFileName: "test/test_tokenize.doc"}
 	compt := NewCompterpreter(conf)
 
@@ -128,7 +128,7 @@ func TestTokenize(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = compt.Tokenize()
+	err = compt.Lex()
 	if err != nil {
 		t.Error(err)
 	}
