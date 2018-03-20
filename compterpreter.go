@@ -20,9 +20,10 @@ type Compterpreter struct {
 	Config       *Config
 	Scanner      scanner.Scanner
 	CurrentChar  rune
-	CurrentToken string
+	CurrentToken Token
 	Symbols      *Symbols
-	Tokens       []string
+	Tokens       []Token
+	StackTree    *StackTree
 }
 
 func NewCompterpreter(c *Config) *Compterpreter {
@@ -106,16 +107,66 @@ func (c *Compterpreter) Lex() error {
 
 func (c *Compterpreter) Parse() error {
 	// build the global StackTree, for all expressions in the global scope as part of an implicit anonymous function
-	//var globalStackTree = NewStackTree(c.Config.SrcFileName)
+	var (
+		opsStack  = []Expr{}
+		exprStack = []Expr{}
+	)
+	c.StackTree = NewStackTree(c.Config.SrcFileName)
+
+	for _, token := range c.Tokens {
+		switch token.Type {
+		case OPERATOR:
+			opsStack = append(opsStack, Expr{Op: token.Value, Arity: OP_TO_ARITY[token.Value]})
+		case INT:
+			exprStack = append(exprStack, Expr{Op: NOOP, Arity: OP_TO_ARITY[NOOP], lOperand: token.Value})
+		case PUNCTUATION:
+			switch token.Value {
+			case "(":
+				opsStack = append(opsStack, Expr{Op: token.Value, Arity: 1, lOperand: token.Value})
+			case ")":
+				// shit gets real
+				var opsExpr = opsStack[len(opsStack)-1]
+				// pop a count of arity items off exprStack
+				var exprs = exprStack[len(exprStack)-1-opsExpr.Arity:]
+				// load popped exprs into the ops expr
+				opsExpr.lOperand = exprs[0]
+				if len(exprs) > 1 {
+					opsExpr.rOperand = exprs[1]
+				}
+				// update the stacks
+				opsStack = opsStack[len(opsStack)-1:]
+				// the +1 here should be the open paren for this expression
+				var betterBeAnOpenParen = opsStack[len(opsStack)-1]
+				if betterBeAnOpenParen.Op != "(" {
+					return UnbalancedParenError
+				}
+				exprStack = exprStack[len(exprStack)-(opsExpr.Arity+1):]
+				// push modified ops expr onto the expr stack
+				exprStack = append(exprStack, opsExpr)
+			default:
+				// whatever
+			}
+		}
+		// there should only be one expr in exprStack
+		if len(exprStack) != 1 {
+			// oh no!
+			return DockerlangSyntaxError
+		}
+		if len(opsStack) > 0 {
+			// oh noooo!
+			return DockerlangSyntaxError
+		}
+		c.StackTree.AST = &exprStack[0]
+	}
 
 	return nil
 }
 
-func (c *Compterpreter) GetNextToken() (string, error) {
+func (c *Compterpreter) GetNextToken() (Token, error) {
 	var err error
 
 	// we must clear the CurrentToken each time we get the next token!
-	c.CurrentToken = ""
+	c.CurrentToken = Token{}
 
 	// we are looping since there are characters we may want to ignore
 	// for example, whitespace or something.
@@ -139,7 +190,7 @@ func (c *Compterpreter) GetNextToken() (string, error) {
 		default:
 			// we've encountered something very unexpected!
 			// i'd like to panic, but i'm gunna keep my kewl
-			return "", fmt.Errorf(
+			return Token{}, fmt.Errorf(
 				"sry, but ive NO IDEA wut this char is: %s. Try typing another one(?)",
 				string(c.CurrentChar),
 			)
@@ -176,7 +227,8 @@ func (c *Compterpreter) IsOperator(r rune) bool {
 
 func (c *Compterpreter) TokenizeWhitespace(r rune) error {
 	if r == '\n' {
-		c.CurrentToken = string(r)
+		c.CurrentToken.Value = string(r)
+		c.CurrentToken.Type = PUNCTUATION
 		return nil
 	}
 
@@ -188,7 +240,8 @@ func (c *Compterpreter) TokenizeWhitespace(r rune) error {
 }
 
 func (c *Compterpreter) TokenizeNumber(r rune) error {
-	c.CurrentToken = c.CurrentToken + string(r)
+	c.CurrentToken.Type = INT
+	c.CurrentToken.Value = c.CurrentToken.Value + string(r)
 
 	// check to see if we need to include the next character in the
 	// current token
@@ -204,7 +257,8 @@ func (c *Compterpreter) TokenizeNumber(r rune) error {
 }
 
 func (c *Compterpreter) TokenizeOperator(r rune) error {
-	c.CurrentToken = c.CurrentToken + string(r)
+	c.CurrentToken.Type = OPERATOR
+	c.CurrentToken.Value = c.CurrentToken.Value + string(r)
 	if err := c.Advance(); err != nil {
 		return err
 	}

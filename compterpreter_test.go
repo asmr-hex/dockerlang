@@ -45,7 +45,7 @@ func TestTokenizeNumber(t *testing.T) {
 
 	compt.TokenizeNumber(compt.CurrentChar)
 
-	if compt.CurrentToken != "1234" {
+	if compt.CurrentToken.Value != "1234" {
 		t.Error("incorrect token!")
 	}
 }
@@ -66,7 +66,7 @@ func TestGetNextToken(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if s != "1234" {
+	if s.Value != "1234" {
 		t.Errorf("incorrect first token! Expected '1234' got '%s'", s)
 	}
 
@@ -74,7 +74,7 @@ func TestGetNextToken(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if s != "5678" {
+	if s.Value != "5678" {
 		t.Errorf("incorrect second token! Expected '5678' got '%s'", s)
 	}
 }
@@ -108,12 +108,12 @@ func TestTokenizeOperator(t *testing.T) {
 	compt.Advance()
 	// advance ptr to first character
 	for _, op := range []string{"‡", "*", "+", "%", "†"} {
-		compt.CurrentToken = ""
+		compt.CurrentToken = Token{}
 		compt.TokenizeOperator(compt.CurrentChar)
 		if string(compt.CurrentChar) == "EOF" {
 			break
 		}
-		if compt.CurrentToken != op {
+		if compt.CurrentToken.Value != op {
 			t.Error("incorrect token")
 		}
 	}
@@ -137,7 +137,7 @@ func TestLex(t *testing.T) {
 		"\n", "123", "†", "3", "*", "2", "‡", "45787894357893", "\n", "0", "+", "00", "+", "1", "\n",
 	}
 	for idx, token := range compt.Tokens {
-		if token != expectedTokens[idx] {
+		if token.Value != expectedTokens[idx] {
 			t.Error("Incorrect token! Try harder")
 		}
 	}
