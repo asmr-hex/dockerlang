@@ -1,6 +1,7 @@
 package dockerlang
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -25,7 +26,8 @@ func TestParser(t *testing.T) {
 	}
 
 	expectedStackTree := &StackTree{
-		Name: "src.go",
+		Name:  "src.doc",
+		Scope: NewScope(),
 		AST: &Expr{
 			Op:    DIVISION_OPERATOR,
 			Arity: OP_TO_ARITY[DIVISION_OPERATOR],
@@ -35,23 +37,21 @@ func TestParser(t *testing.T) {
 				LOperand: &Expr{
 					Op:       NOOP,
 					Arity:    OP_TO_ARITY[NOOP],
-					LOperand: 2,
+					ROperand: "2",
 				},
 				ROperand: &Expr{
 					Op:       NOOP,
 					Arity:    OP_TO_ARITY[NOOP],
-					LOperand: 3,
+					ROperand: "3",
 				},
 			},
 			ROperand: &Expr{
 				Op:       NOOP,
 				Arity:    OP_TO_ARITY[NOOP],
-				LOperand: 1,
+				ROperand: "1",
 			},
 		},
 	}
 
-	if expectedStackTree != compt.StackTree {
-		t.Error("expected StackTree not equal to actual StackTree")
-	}
+	assert.EqualValues(t, expectedStackTree, compt.StackTree)
 }

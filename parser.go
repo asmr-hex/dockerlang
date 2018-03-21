@@ -48,11 +48,11 @@ func (c *Compterpreter) Parse() error {
 		case OPERATOR:
 			opsStack.Push(&Expr{Op: token.Value, Arity: OP_TO_ARITY[token.Value]})
 		case INT:
-			exprStack.Push(&Expr{Op: NOOP, Arity: OP_TO_ARITY[NOOP], LOperand: token.Value})
+			exprStack.Push(&Expr{Op: NOOP, Arity: OP_TO_ARITY[NOOP], ROperand: token.Value})
 		case PUNCTUATION:
 			switch token.Value {
 			case "(":
-				opsStack.Push(&Expr{Op: token.Value, Arity: 1, LOperand: token.Value})
+				opsStack.Push(&Expr{Op: token.Value, Arity: 1, ROperand: token.Value})
 			case ")":
 				// shit gets real
 				var opsExpr = opsStack.Pop()
@@ -62,9 +62,9 @@ func (c *Compterpreter) Parse() error {
 					exprs = append(exprs, exprStack.Pop())
 				}
 				// load popped exprs into the ops expr
-				opsExpr.LOperand = exprs[0]
+				opsExpr.ROperand = exprs[0]
 				if len(exprs) > 1 {
-					opsExpr.ROperand = exprs[1]
+					opsExpr.LOperand = exprs[1]
 				}
 				// update the stacks
 				var betterBeAnOpenParen = opsStack.Pop()
