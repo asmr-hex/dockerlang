@@ -27,28 +27,29 @@ func TestParser(t *testing.T) {
 
 	expectedStackTree := &StackTree{
 		Name: "src.doc",
-		Returns: []AST{
-			&Expr{
-				Op:    DIVISION_OPERATOR,
-				Arity: OP_TO_ARITY[DIVISION_OPERATOR],
-				LOperand: &Expr{
+		Body: &Expr{
+			Op:    DIVISION_OPERATOR,
+			Arity: OP_TO_ARITY[DIVISION_OPERATOR],
+			Operands: []interface{}{
+				&Expr{
 					Op:    ADDITION_OPERATOR,
 					Arity: OP_TO_ARITY[ADDITION_OPERATOR],
-					LOperand: &Expr{
+					Operands: []interface{}{&Expr{
 						Op:       NOOP,
 						Arity:    OP_TO_ARITY[NOOP],
-						ROperand: "2",
+						Operands: []interface{}{"2"},
 					},
-					ROperand: &Expr{
-						Op:       NOOP,
-						Arity:    OP_TO_ARITY[NOOP],
-						ROperand: "3",
+						&Expr{
+							Op:       NOOP,
+							Arity:    OP_TO_ARITY[NOOP],
+							Operands: []interface{}{"3"},
+						},
 					},
 				},
-				ROperand: &Expr{
+				&Expr{
 					Op:       NOOP,
 					Arity:    OP_TO_ARITY[NOOP],
-					ROperand: "1",
+					Operands: []interface{}{"1"},
 				},
 			},
 		},

@@ -2,19 +2,19 @@ package dockerlang
 
 // each function in Dockerlang will have its own StackTree of the form:
 //
-//                 function StackTree
-//        __________|____________________
+//              function StackTree
+//        _______________|_______________
 //       |          |          |         |
-//      arg       global      local    returns
-//      /\          /\         /\       /\
-//     ASTs        ASTs       ASTs     ASTs
+//      args      global      local    body
+//      /\          /\         /\        |
+//    AST map    AST map  empty AST map  AST
 
 type StackTree struct {
 	Name    string
-	Args    []AST
-	Local   []AST
-	Global  []AST
-	Returns []AST
+	Args    map[string]AST
+	Locals  map[string]AST
+	Globals map[string]AST
+	Body    AST
 }
 
 func NewStackTree(name string) *StackTree {
@@ -28,11 +28,11 @@ func (s *StackTree) Eval() ([]interface{}, []interface{}, error) {
 }
 
 type Expr struct {
+	Name     string
 	Op       string
 	DLII     string
 	Arity    int
-	LOperand interface{}
-	ROperand interface{}
+	Operands []interface{}
 }
 
 func (e *Expr) Eval() ([]interface{}, []interface{}, error) {

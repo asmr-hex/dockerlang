@@ -48,27 +48,21 @@ func (c *Compterpreter) Parse() error {
 		case OPERATOR:
 			opsStack.Push(&Expr{Op: token.Value, Arity: OP_TO_ARITY[token.Value]})
 		case INT:
-			exprStack.Push(&Expr{Op: NOOP, Arity: OP_TO_ARITY[NOOP], ROperand: token.Value})
+			exprStack.Push(&Expr{Op: NOOP, Arity: OP_TO_ARITY[NOOP], Operands: []interface{}{token.Value}})
 		case PUNCTUATION:
 			switch token.Value {
 			case "(":
-				opsStack.Push(&Expr{Op: token.Value, Arity: 1, ROperand: token.Value})
+				opsStack.Push(&Expr{Op: token.Value, Arity: 1, Operands: []interface{}{token.Value}})
 			case ")":
 				// shit gets real
 				var opsExpr = opsStack.Pop()
 				// pop a count of arity items off exprStack
-				exprs := []*Expr{}
 				for i := 0; i < opsExpr.Arity; i++ {
 					// make sure we're not popping nil into exprs
 					if exprStack.Peek() == nil {
 						return DockerlangSyntaxError
 					}
-					exprs = append(exprs, exprStack.Pop())
-				}
-				// load popped exprs into the ops expr
-				opsExpr.ROperand = exprs[0]
-				if len(exprs) > 1 {
-					opsExpr.LOperand = exprs[1]
+					opsExpr.Operands = append([]interface{}{exprStack.Pop()}, opsExpr.Operands...)
 				}
 				// update the stacks
 				var betterBeAnOpenParen = opsStack.Pop()
@@ -92,7 +86,7 @@ func (c *Compterpreter) Parse() error {
 		// oh noooo!
 		return DockerlangSyntaxError
 	}
-	c.StackTree.Returns = []AST{exprStack.Pop()}
+	c.StackTree.Body = exprStack.Pop()
 
 	return nil
 }

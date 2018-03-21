@@ -6,6 +6,8 @@ const (
 	MULTIPLICATION_OPERATOR = "*"
 	DIVISION_OPERATOR       = "‡"
 	MODULO_OPERATOR         = "%"
+	VARIABLE_INITIALIZATION = "≡"
+	VARIABLE_ASSIGNMENT     = "="
 	NOOP                    = "NOOP"
 
 	R_PAREN_PUNCTION    = "("
@@ -19,6 +21,8 @@ var (
 		MULTIPLICATION_OPERATOR: 2,
 		DIVISION_OPERATOR:       2,
 		MODULO_OPERATOR:         2,
+		VARIABLE_INITIALIZATION: 1,
+		VARIABLE_ASSIGNMENT:     1,
 		NOOP:                    1,
 	}
 )
