@@ -10,3 +10,7 @@ package dockerlang
 
 // Precedence for variable lookup is:
 // Local, Args, Global
+
+func (c *Compterpreter) Evaluate() error {
+	return c.StackTree.Operands[0].Eval()
+}

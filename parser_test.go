@@ -25,51 +25,28 @@ func TestParser(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedStackTree := &StackTree{
+	expectedTree := &Expr{
 		Name: "src.doc",
-		Body: &Expr{
-			Op:    DIVISION_OPERATOR,
-			Arity: OP_TO_ARITY[DIVISION_OPERATOR],
-			Operands: []interface{}{
-				&Expr{
-					Op:    ADDITION_OPERATOR,
-					Arity: OP_TO_ARITY[ADDITION_OPERATOR],
-					Operands: []interface{}{&Expr{
-						Op:       NOOP,
-						Arity:    OP_TO_ARITY[NOOP],
-						Operands: []interface{}{"2"},
-					},
-						&Expr{
-							Op:       NOOP,
-							Arity:    OP_TO_ARITY[NOOP],
-							Operands: []interface{}{"3"},
+		Operands: []AST{
+			&Expr{
+				Op:    DIVISION_OPERATOR,
+				Arity: OP_TO_ARITY[DIVISION_OPERATOR],
+				Operands: []AST{
+					&Expr{
+						Op:    ADDITION_OPERATOR,
+						Arity: OP_TO_ARITY[ADDITION_OPERATOR],
+						Operands: []AST{
+							&Literal{Type: INT, Value: "2"},
+							&Literal{Type: INT, Value: "3"},
 						},
 					},
-				},
-				&Expr{
-					Op:       NOOP,
-					Arity:    OP_TO_ARITY[NOOP],
-					Operands: []interface{}{"1"},
+					&Literal{Type: INT, Value: "1"},
 				},
 			},
 		},
 	}
 
-	assert.EqualValues(t, expectedStackTree, compt.StackTree)
-}
-
-func TestParser_ImbalancedParens(t *testing.T) {
-	compt := &Compterpreter{Config: &Config{SrcFileName: "src.doc"}}
-	compt.Tokens = []Token{
-		{Type: OPERATOR, Value: "+"},
-		// is whint? ;)
-		{Type: INT, Value: "2"},
-		{Type: INT, Value: "3"},
-		{Type: PUNCTUATION, Value: ")"},
-	}
-
-	err := compt.Parse()
-	assert.EqualValues(t, err, DockerlangSyntaxError)
+	assert.EqualValues(t, expectedTree, compt.StackTree)
 }
 
 func TestParser_SyntaxError(t *testing.T) {

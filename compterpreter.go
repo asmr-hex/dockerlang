@@ -20,7 +20,7 @@ type Compterpreter struct {
 	CurrentToken Token
 	Symbols      *Symbols
 	Tokens       []Token
-	StackTree    *StackTree
+	StackTree    *Expr
 }
 
 func NewCompterpreter(c *Config) *Compterpreter {
@@ -75,9 +75,12 @@ func (c *Compterpreter) LoadSourceCode() error {
 }
 
 func (c *Compterpreter) Interpret() error {
+	// Identifies tokens in the provided .doc code
 	c.Lex()
-
+	// Creates c.StackTree representing the provided .doc code
 	c.Parse()
+	// Actually dockerize and evaluate the StackTree
+	c.Evaluate()
 
 	return nil
 }

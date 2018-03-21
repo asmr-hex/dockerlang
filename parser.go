@@ -1,18 +1,18 @@
 package dockerlang
 
-type ExprStack struct {
-	Elements []*Expr
+type Stack struct {
+	Elements []AST
 }
 
-func NewExprStack() *ExprStack {
-	return &ExprStack{Elements: []*Expr{}}
+func NewStack() *Stack {
+	return &Stack{Elements: []AST{}}
 }
 
-func (s *ExprStack) Push(e *Expr) {
+func (s *Stack) Push(e AST) {
 	s.Elements = append(s.Elements, e)
 }
 
-func (s *ExprStack) Pop() *Expr {
+func (s *Stack) Pop() AST {
 	e := s.Peek()
 	if e == nil {
 		return nil
@@ -23,7 +23,7 @@ func (s *ExprStack) Pop() *Expr {
 	return e
 }
 
-func (s *ExprStack) Peek() *Expr {
+func (s *Stack) Peek() AST {
 	if len(s.Elements) == 0 {
 		return nil
 	}
@@ -31,43 +31,38 @@ func (s *ExprStack) Peek() *Expr {
 	return s.Elements[len(s.Elements)-1]
 }
 
-func (s *ExprStack) Length() int {
+func (s *Stack) Length() int {
 	return len(s.Elements)
 }
 
 func (c *Compterpreter) Parse() error {
 	// build the global StackTree, for all expressions in the global scope as part of an implicit anonymous function
 	var (
-		opsStack  = NewExprStack()
-		exprStack = NewExprStack()
+		opsStack  = NewStack()
+		exprStack = NewStack()
 	)
-	c.StackTree = NewStackTree(c.Config.SrcFileName)
+	c.StackTree = NewExpr(c.Config.SrcFileName)
 
 	for _, token := range c.Tokens {
 		switch token.Type {
 		case OPERATOR:
 			opsStack.Push(&Expr{Op: token.Value, Arity: OP_TO_ARITY[token.Value]})
 		case INT:
-			exprStack.Push(&Expr{Op: NOOP, Arity: OP_TO_ARITY[NOOP], Operands: []interface{}{token.Value}})
+			exprStack.Push(&Literal{Type: INT, Value: token.Value})
 		case PUNCTUATION:
 			switch token.Value {
 			case "(":
-				opsStack.Push(&Expr{Op: token.Value, Arity: 1, Operands: []interface{}{token.Value}})
+				// TODO: eventually check a puntaution stack for syntax checking
 			case ")":
 				// shit gets real
-				var opsExpr = opsStack.Pop()
+				var opsExpr = opsStack.Pop().(*Expr)
 				// pop a count of arity items off exprStack
 				for i := 0; i < opsExpr.Arity; i++ {
 					// make sure we're not popping nil into exprs
 					if exprStack.Peek() == nil {
 						return DockerlangSyntaxError
 					}
-					opsExpr.Operands = append([]interface{}{exprStack.Pop()}, opsExpr.Operands...)
-				}
-				// update the stacks
-				var betterBeAnOpenParen = opsStack.Pop()
-				if betterBeAnOpenParen == nil || betterBeAnOpenParen.Op != "(" {
-					return DockerlangSyntaxError
+					opsExpr.Operands = append([]AST{exprStack.Pop()}, opsExpr.Operands...)
 				}
 				// push modified ops expr onto the expr stack
 				exprStack.Push(opsExpr)
@@ -86,7 +81,7 @@ func (c *Compterpreter) Parse() error {
 		// oh noooo!
 		return DockerlangSyntaxError
 	}
-	c.StackTree.Body = exprStack.Pop()
+	c.StackTree.Operands = []AST{exprStack.Pop().(*Expr)}
 
 	return nil
 }

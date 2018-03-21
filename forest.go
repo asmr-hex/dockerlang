@@ -9,36 +9,77 @@ package dockerlang
 //      /\          /\         /\        \
 //    AST map    AST map  empty AST map   (AST of parsed code)
 
-type StackTree struct {
-	Name    string
-	Args    map[string]AST
-	Locals  map[string]AST
-	Globals map[string]AST
-	Body    AST
+type AST interface {
+	Eval() error
+	GetChildren() []AST
 }
 
-func NewStackTree(name string) *StackTree {
-	return &StackTree{
-		Name: name,
+// we should never actually instantiate this on its own
+// it should *always* be an embedded structure (this is a mixin)
+type BaseAST struct{}
+
+func (b *BaseAST) GetChildren() []AST {
+	return []AST{}
+}
+
+func (b *BaseAST) Eval() error {
+	var (
+		err error
+	)
+
+	// we need to evaluate all child expressions in order
+	// to evaluate the current expression. So, evaluate
+	// all the child ASTs from left to right
+	for _, child := range b.GetChildren() {
+		err = child.Eval()
+		if err != nil {
+			return err
+		}
 	}
-}
 
-func (s *StackTree) Eval() ([]interface{}, []interface{}, error) {
-	return nil, nil, nil
+	// we've computed all dependencies, now lets eval this thang
+	err = b.Eval()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type Expr struct {
+	BaseAST
 	Name     string
 	Op       string
 	DLII     string
 	Arity    int
-	Operands []interface{}
+	Operands []AST
+	Args     map[string]AST
+	Locals   map[string]AST
+	Globals  map[string]AST
 }
 
-func (e *Expr) Eval() ([]interface{}, []interface{}, error) {
-	return nil, nil, nil
+func NewExpr(name string) *Expr {
+	return &Expr{
+		Name: name,
+	}
 }
 
-type AST interface {
-	Eval() ([]interface{}, []interface{}, error)
+type IfConditional struct{}
+
+func (c *IfConditional) Eval() error {
+
+	return nil
+}
+
+type Variable struct {
+	BaseAST
+	Literal
+	Name  string
+	Bound bool
+}
+
+type Literal struct {
+	BaseAST
+	Type  string
+	Value interface{}
 }
