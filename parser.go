@@ -59,6 +59,10 @@ func (c *Compterpreter) Parse() error {
 				// pop a count of arity items off exprStack
 				exprs := []*Expr{}
 				for i := 0; i < opsExpr.Arity; i++ {
+					// make sure we're not popping nil into exprs
+					if exprStack.Peek() == nil {
+						return DockerlangSyntaxError
+					}
 					exprs = append(exprs, exprStack.Pop())
 				}
 				// load popped exprs into the ops expr
@@ -68,8 +72,8 @@ func (c *Compterpreter) Parse() error {
 				}
 				// update the stacks
 				var betterBeAnOpenParen = opsStack.Pop()
-				if betterBeAnOpenParen.Op != "(" {
-					return UnbalancedParenError
+				if betterBeAnOpenParen == nil || betterBeAnOpenParen.Op != "(" {
+					return DockerlangSyntaxError
 				}
 				// push modified ops expr onto the expr stack
 				exprStack.Push(opsExpr)
