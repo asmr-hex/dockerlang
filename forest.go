@@ -5,9 +5,9 @@ package dockerlang
 //              function StackTree
 //        _______________|_______________
 //       |          |          |         |
-//      args      global      local    body
-//      /\          /\         /\        |
-//    AST map    AST map  empty AST map  AST
+//      args      global      local   body AST
+//      /\          /\         /\        \
+//    AST map    AST map  empty AST map   (AST of parsed code)
 
 type StackTree struct {
 	Name    string
