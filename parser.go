@@ -92,7 +92,7 @@ func (c *Compterpreter) Parse() error {
 		// oh noooo!
 		return DockerlangSyntaxError
 	}
-	c.StackTree.AST = exprStack.Pop()
+	c.StackTree.Returns = []AST{exprStack.Pop()}
 
 	return nil
 }
