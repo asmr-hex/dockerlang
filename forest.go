@@ -45,8 +45,8 @@ type Expr struct {
 	Op       string
 	DLII     string
 	Arity    int
-	lOperand interface{}
-	rOperand interface{}
+	LOperand interface{}
+	ROperand interface{}
 }
 
 func (e *Expr) Eval() ([]interface{}, []interface{}, error) {
