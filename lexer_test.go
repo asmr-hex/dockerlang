@@ -1,6 +1,8 @@
 package dockerlang
 
 import (
+	"fmt"
+
 	"github.com/stretchr/testify/suite"
 )
 
@@ -102,10 +104,15 @@ func (s *LexerSuite) TestLex() {
 	err = compt.Lex()
 	s.NoError(err)
 
+	for _, v := range compt.Tokens {
+		fmt.Println(v.Value)
+	}
+
 	expectedTokens := []string{
 		"\n", "123", "†", "3", "*", "2", "‡", "45787894357893", "\n", "0", "+", "00", "+", "1", "\n",
 	}
-	for idx, token := range compt.Tokens {
-		s.EqualValues(token.Value, expectedTokens[idx])
+	s.EqualValues(len(expectedTokens), len(compt.Tokens))
+	for idx, token := range expectedTokens {
+		s.EqualValues(token, compt.Tokens[idx].Value)
 	}
 }

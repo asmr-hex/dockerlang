@@ -13,20 +13,16 @@ func (c *Compterpreter) Lex() error {
 	for {
 		token, err := c.GetNextToken()
 		// gracefully catch end of file
-		switch err {
-		case io.EOF:
+		switch {
+		case err == io.EOF:
 			return nil
-		// case nil:
-		// 	c.Tokens = append(c.Tokens, token)
-		// 	continue
+		case err == nil:
+			c.Tokens = append(c.Tokens, token)
+			continue
 		default:
 			return err
 		}
-
-		c.Tokens = append(c.Tokens, token)
 	}
-
-	return nil
 }
 
 func (c *Compterpreter) GetNextToken() (Token, error) {
@@ -107,6 +103,11 @@ func (c *Compterpreter) TokenizeWhitespace(r rune) error {
 	if r == '\n' {
 		c.CurrentToken.Value = string(r)
 		c.CurrentToken.Type = PUNCTUATION
+
+		if err := c.Advance(); err != nil {
+			return err
+		}
+
 		return nil
 	}
 
