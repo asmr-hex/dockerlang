@@ -1,99 +1,84 @@
 package dockerlang
 
 import (
-	"testing"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestTokenizeNumber(t *testing.T) {
+type LexerSuite struct {
+	suite.Suite
+}
+
+func (s *LexerSuite) AfterTest(suiteName, testName string) {
+	ShutdownExecutionEngine()
+}
+
+func (s *LexerSuite) TestTokenizeNumber() {
 	conf := &Config{SrcFileName: "test/test.doc"}
 	compt := NewCompterpreter(conf)
 
 	err := compt.LoadSourceCode()
-	if err != nil {
-		t.Error(err)
-	}
+	s.NoError(err)
 
 	// advance ptr to first character
 	compt.Advance()
 
 	compt.TokenizeNumber(compt.CurrentChar)
 
-	if compt.CurrentToken.Value != "1234" {
-		t.Error("incorrect token!")
-	}
+	s.EqualValues(compt.CurrentToken.Value, "1234")
 }
 
-func TestGetNextToken(t *testing.T) {
+func (s *LexerSuite) TestGetNextToken() {
 	conf := &Config{SrcFileName: "test/test.doc"}
 	compt := NewCompterpreter(conf)
 
 	err := compt.LoadSourceCode()
-	if err != nil {
-		t.Error(err)
-	}
+	s.NoError(err)
 
 	// advance ptr to first character
 	compt.Advance()
 
-	s, err := compt.GetNextToken()
-	if err != nil {
-		t.Error(err)
-	}
-	if s.Value != "1234" {
-		t.Errorf("incorrect first token! Expected '1234' got '%s'", s)
-	}
+	t, err := compt.GetNextToken()
+	s.NoError(err)
 
-	s, err = compt.GetNextToken()
-	if err != nil {
-		t.Error(err)
-	}
-	if s.Value != "5678" {
-		t.Errorf("incorrect second token! Expected '5678' got '%s'", s)
-	}
+	s.EqualValues(t.Value, "1234")
+
+	t, err = compt.GetNextToken()
+	s.NoError(err)
+	s.EqualValues(t.Value, "5678")
 }
 
-func TestIsOperator(t *testing.T) {
+func (s *LexerSuite) TestIsOperator() {
 	conf := &Config{SrcFileName: "test/test.doc"}
 	compt := NewCompterpreter(conf)
 	for _, operator := range []rune{'+', '†', '*', '‡', '%'} {
 		ok := compt.IsOperator(operator)
-		if !ok {
-			t.Error("not an operator! but it should be!")
-		}
+		s.True(ok)
 	}
 	for _, operator := range []rune{'q', '!', '❧', '0', ' '} {
 		ok := compt.IsOperator(operator)
-		if ok {
-			t.Error("that was an operator! but it shouldn't be!")
-		}
+		s.False(ok)
 	}
 }
 
-func TestIsPunctuation(t *testing.T) {
+func (s *LexerSuite) TestIsPunctuation() {
 	conf := &Config{SrcFileName: "test/test.doc"}
 	compt := NewCompterpreter(conf)
 	for _, operator := range []rune{'(', ')', '(', ')'} {
 		ok := compt.IsPunctuation(operator)
-		if !ok {
-			t.Error("not punctuation! but it should be!")
-		}
+		s.True(ok)
 	}
 	for _, operator := range []rune{'q', '!', '❧', '0', ' '} {
 		ok := compt.IsPunctuation(operator)
-		if ok {
-			t.Error("that was puncuation! but it shouldn't be!")
-		}
+		s.False(ok)
 	}
 }
 
-func TestTokenizeOperator(t *testing.T) {
+func (s *LexerSuite) TestTokenizeOperator() {
 	conf := &Config{SrcFileName: "test/test-operators.doc"}
 	compt := NewCompterpreter(conf)
 
 	err := compt.LoadSourceCode()
-	if err != nil {
-		t.Error(err)
-	}
+	s.NoError(err)
 
 	compt.Advance()
 	// advance ptr to first character
@@ -103,32 +88,24 @@ func TestTokenizeOperator(t *testing.T) {
 		if string(compt.CurrentChar) == "EOF" {
 			break
 		}
-		if compt.CurrentToken.Value != op {
-			t.Error("incorrect token")
-		}
+		s.EqualValues(compt.CurrentToken.Value, op)
 	}
 }
 
-func TestLex(t *testing.T) {
+func (s *LexerSuite) TestLex() {
 	conf := &Config{SrcFileName: "test/test_tokenize.doc"}
 	compt := NewCompterpreter(conf)
 
 	err := compt.LoadSourceCode()
-	if err != nil {
-		t.Error(err)
-	}
+	s.NoError(err)
 
 	err = compt.Lex()
-	if err != nil {
-		t.Error(err)
-	}
+	s.NoError(err)
 
 	expectedTokens := []string{
 		"\n", "123", "†", "3", "*", "2", "‡", "45787894357893", "\n", "0", "+", "00", "+", "1", "\n",
 	}
 	for idx, token := range compt.Tokens {
-		if token.Value != expectedTokens[idx] {
-			t.Error("Incorrect token! Try harder")
-		}
+		s.EqualValues(token.Value, expectedTokens[idx])
 	}
 }

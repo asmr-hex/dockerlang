@@ -24,6 +24,14 @@ type Compterpreter struct {
 }
 
 func NewCompterpreter(c *Config) *Compterpreter {
+	// whenever we create a new compterpreter, we will also
+	// create a new execution engine which is set in the global
+	// scope.
+	err := NewExecutionEngine()
+	if err != nil {
+		panic(err)
+	}
+
 	return &Compterpreter{
 		Config:  c,
 		Symbols: PopulateSymbols(),
@@ -34,6 +42,9 @@ func (c *Compterpreter) Compterpret() error {
 	var (
 		err error
 	)
+
+	// always shutdown the docker execution engine
+	defer ShutdownExecutionEngine()
 
 	// initialize a scanner to read through source code character
 	// by character

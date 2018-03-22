@@ -32,10 +32,11 @@ func (b *BaseAST) Execute() error {
 	// expressions) will have their own containers. Literals will not. The variable
 	// declaration operator will spin up an new unbound variable container while
 	// the variable assignment operator will set the value within that container.
-	//
+
 	// we will be using the docker golang api since docker is written
 	// in go and therefore we can just talk directly to docker through
 	// this code.
+
 	// before execution of anything, create a docker network
 	// when we run a docker container, we must give it the network name
 	// and the computation type (some data structure we haven't decided on yet)

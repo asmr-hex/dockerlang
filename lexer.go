@@ -16,6 +16,9 @@ func (c *Compterpreter) Lex() error {
 		switch err {
 		case io.EOF:
 			return nil
+		// case nil:
+		// 	c.Tokens = append(c.Tokens, token)
+		// 	continue
 		default:
 			return err
 		}

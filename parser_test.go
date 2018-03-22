@@ -1,11 +1,18 @@
 package dockerlang
 
 import (
-	"github.com/stretchr/testify/assert"
-	"testing"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestParser(t *testing.T) {
+type ParserSuite struct {
+	suite.Suite
+}
+
+func (s *ParserSuite) AfterTest(suiteName, testName string) {
+	ShutdownExecutionEngine()
+}
+
+func (s *ParserSuite) TestParser() {
 	compt := &Compterpreter{Config: &Config{SrcFileName: "src.doc"}}
 	compt.Tokens = []Token{
 		{Type: PUNCTUATION, Value: "("},
@@ -21,9 +28,7 @@ func TestParser(t *testing.T) {
 	}
 
 	err := compt.Parse()
-	if err != nil {
-		t.Error(err)
-	}
+	s.NoError(err)
 
 	expectedTree := &Expr{
 		Name: "src.doc",
@@ -46,10 +51,10 @@ func TestParser(t *testing.T) {
 		},
 	}
 
-	assert.EqualValues(t, expectedTree, compt.StackTree)
+	s.EqualValues(expectedTree, compt.StackTree)
 }
 
-func TestParser_SyntaxError(t *testing.T) {
+func (s *ParserSuite) TestParser_SyntaxError() {
 	compt := &Compterpreter{Config: &Config{SrcFileName: "src.doc"}}
 	compt.Tokens = []Token{
 		{Type: PUNCTUATION, Value: "("},
@@ -60,7 +65,7 @@ func TestParser_SyntaxError(t *testing.T) {
 	}
 
 	err := compt.Parse()
-	assert.EqualValues(t, err, DockerlangSyntaxError)
+	s.EqualValues(err, DockerlangSyntaxError)
 
 	compt.Tokens = []Token{
 		{Type: PUNCTUATION, Value: "("},
@@ -70,7 +75,7 @@ func TestParser_SyntaxError(t *testing.T) {
 	}
 
 	err = compt.Parse()
-	assert.EqualValues(t, err, DockerlangSyntaxError)
+	s.EqualValues(err, DockerlangSyntaxError)
 
 	compt.Tokens = []Token{
 		{Type: PUNCTUATION, Value: "("},
@@ -88,5 +93,5 @@ func TestParser_SyntaxError(t *testing.T) {
 	}
 
 	err = compt.Parse()
-	assert.EqualValues(t, err, DockerlangSyntaxError)
+	s.EqualValues(err, DockerlangSyntaxError)
 }

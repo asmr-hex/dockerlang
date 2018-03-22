@@ -1,25 +1,29 @@
 package dockerlang
 
 import (
-	"testing"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestLoadSourceCode_NoSuchFile(t *testing.T) {
+type CompterpreterSuite struct {
+	suite.Suite
+}
+
+func (s *CompterpreterSuite) AfterTest(suiteName, testName string) {
+	ShutdownExecutionEngine()
+}
+
+func (s *CompterpreterSuite) TestLoadSourceCode_NoSuchFile() {
 	conf := &Config{SrcFileName: "nonexistent_test_src.doc"}
 	compt := NewCompterpreter(conf)
 
 	err := compt.LoadSourceCode()
-	if err == nil {
-		t.Error("failed to fail to find file")
-	}
+	s.Error(err)
 }
 
-func TestLoadSourceCode(t *testing.T) {
+func (s *CompterpreterSuite) TestLoadSourceCode() {
 	conf := &Config{SrcFileName: "test/test.doc"}
 	compt := NewCompterpreter(conf)
 
 	err := compt.LoadSourceCode()
-	if err != nil {
-		t.Error(err)
-	}
+	s.NoError(err)
 }
