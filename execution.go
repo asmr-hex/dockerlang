@@ -6,8 +6,18 @@ import (
 	"os"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
 	uuid "github.com/satori/go.uuid"
+)
+
+const (
+	MEMORY_PORT = "6666"
+
+	COMPUTATION_TYPE_ENV_VAR  = "COMPUTATION_TYPE_ENV_VAR"
+	COMPUTATION_VALUE_ENV_VAR = "COMPUTATION_VALUE_ENV_VAR"
 )
 
 var (
@@ -21,7 +31,9 @@ type ExecutionEngine struct {
 }
 
 type ExecutionData struct {
-	Operands []DLCI
+	ComputationType string
+	Value           string
+	Operands        []DLCI
 }
 
 // constructs an ExecutionEngine and binds to the globally scoped executer.
@@ -79,6 +91,30 @@ func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
 	// start container with network name
 
 	// pass data structure needed to compute
+
+	// create a DLCI (finally)
+	dlci := "cool"
+
+	e.Docker.ContainerCreate(
+		context.TODO(),
+		&container.Config{
+			ExposedPorts: nat.PortSet{MEMORY_PORT: struct{}{}},
+			Image:        "dockerlang",
+			Env: []string{
+				fmt.Sprintf("%s=%s", COMPUTATION_TYPE_ENV_VAR, d.ComputationType),
+				fmt.Sprintf("%s=%s", COMPUTATION_VALUE_ENV_VAR, d.Value),
+			},
+		},
+		nil,
+		&network.NetworkingConfig{
+			EndpointsConfig: map[string]*network.EndpointSettings{
+				e.Network: &network.EndpointSettings{
+					NetworkID: e.Network,
+				},
+			},
+		},
+		dlci,
+	)
 
 	return "", nil
 }

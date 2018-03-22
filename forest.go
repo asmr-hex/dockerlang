@@ -66,12 +66,12 @@ func (b *BaseAST) Eval() (DLCI, error) {
 	}
 
 	// we've computed all dependencies, now lets eval this thang
-	literal, err := b.Execute()
+	dlci, err := b.Execute()
 	if err != nil {
 		return "", err
 	}
 
-	return literal, nil
+	return dlci, nil
 }
 
 type Expr struct {
