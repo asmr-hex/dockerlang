@@ -18,6 +18,7 @@ const (
 
 	COMPUTATION_TYPE_ENV_VAR  = "COMPUTATION_TYPE_ENV_VAR"
 	COMPUTATION_VALUE_ENV_VAR = "COMPUTATION_VALUE_ENV_VAR"
+	COMPUTATION_DEPS_ENV_VAR  = "COMPUTATION_DEPS_ENV_VAR"
 )
 
 var (
@@ -91,6 +92,10 @@ func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
 	// start container with network name
 
 	// pass data structure needed to compute
+	dependencies := ""
+	for _, dep := range d.Operands {
+		dependencies += "," + string(dep)
+	}
 
 	// create a DLCI (finally)
 	dlci := "cool"
@@ -103,6 +108,7 @@ func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
 			Env: []string{
 				fmt.Sprintf("%s=%s", COMPUTATION_TYPE_ENV_VAR, d.ComputationType),
 				fmt.Sprintf("%s=%s", COMPUTATION_VALUE_ENV_VAR, d.Value),
+				fmt.Sprintf("%s=%s", COMPUTATION_DEPS_ENV_VAR, dependencies),
 			},
 		},
 		nil,
