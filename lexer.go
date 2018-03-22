@@ -3,6 +3,7 @@ package dockerlang
 import (
 	"fmt"
 	"io"
+	"text/scanner"
 	"unicode"
 )
 
@@ -19,7 +20,7 @@ func (c *Compterpreter) Lex() error {
 		case err == nil:
 			c.Tokens = append(c.Tokens, token)
 			continue
-		default:
+		case err != nil:
 			return err
 		}
 	}
@@ -38,10 +39,10 @@ func (c *Compterpreter) GetNextToken() (Token, error) {
 		case c.IsWhitespace(c.CurrentChar):
 			// igfnore non-linebreak whitespace
 			err = c.TokenizeWhitespace(c.CurrentChar)
-			switch err {
-			case io.EOF:
+			switch {
+			case err == io.EOF:
 				return c.CurrentToken, err
-			case TrivialWhitespaceError:
+			case err == TrivialWhitespaceError:
 				continue
 			}
 		case c.IsOperator(c.CurrentChar):
@@ -163,7 +164,7 @@ func (c *Compterpreter) TokenizePunctuation(r rune) error {
 func (c *Compterpreter) Advance() error {
 	c.CurrentChar = c.Scanner.Next()
 
-	if string(c.CurrentChar) == "EOF" {
+	if c.CurrentChar == scanner.EOF {
 		return io.EOF
 	}
 

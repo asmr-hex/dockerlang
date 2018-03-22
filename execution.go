@@ -49,7 +49,7 @@ func NewExecutionEngine() error {
 	}
 
 	// setup container bridge network if one doesn't already exist.
-	response, err := executer.Docker.NetworkCreate(
+	_, err = executer.Docker.NetworkCreate(
 		context.TODO(),
 		networkName,
 		types.NetworkCreate{},
@@ -57,8 +57,6 @@ func NewExecutionEngine() error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(response)
 
 	return nil
 }
