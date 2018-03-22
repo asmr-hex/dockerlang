@@ -37,7 +37,7 @@ func main() {
 		return
 	}
 
-	compterpreter = dockerlang.NewCompterpreter(conf)
+	compterpreter := dockerlang.NewCompterpreter(conf)
 	err = compterpreter.Compterpret()
 	if err != nil {
 		fmt.Println(err.Error())
