@@ -10,23 +10,26 @@ package dockerlang
 //    AST map    AST map  empty AST map   (AST of parsed code)
 
 type AST interface {
-	Eval() error
+	Eval() (DLCI, error)
+	Execute() (DLCI, error)
 	GetChildren() []AST
 }
 
 // we should never actually instantiate this on its own
 // it should *always* be an embedded structure (this is a mixin)
-type BaseAST struct{}
+type BaseAST struct {
+	ExecData *ExecutionData
+}
 
 func (b *BaseAST) GetChildren() []AST {
 	return []AST{}
 }
 
-func (b *BaseAST) Execute() error {
+func (b *BaseAST) Execute() (DLCI, error) {
 	// actual docker
 
 	// but wait, what parts of the AST actually have their own containers?
-	// containers are like memory cells and DLIIs are like memory pointers,
+	// containers are like memory cells and DLCIs are like memory pointers,
 	// so anything we are storing in memory we will give its own docker container
 	// this means variables, expressions, and functions (which are basically just
 	// expressions) will have their own containers. Literals will not. The variable
@@ -37,17 +40,14 @@ func (b *BaseAST) Execute() error {
 	// in go and therefore we can just talk directly to docker through
 	// this code.
 
-	// before execution of anything, create a docker network
-	// when we run a docker container, we must give it the network name
-	// and the computation type (some data structure we haven't decided on yet)
+	// OK before execution of anything, create a docker network
+
+	// pass computation data (some data structure we haven't decided on yet)
 	// for it to execute
-	// each container will persist until that computation is no longer in scope
-	// within the source code.
-	// to that end, we can implement a very simple garbage collector or something.
-	return nil
+	return executer.Run(b.ExecData)
 }
 
-func (b *BaseAST) Eval() error {
+func (b *BaseAST) Eval() (DLCI, error) {
 	var (
 		err error
 	)
@@ -56,26 +56,29 @@ func (b *BaseAST) Eval() error {
 	// to evaluate the current expression. So, evaluate
 	// all the child ASTs from left to right
 	for _, child := range b.GetChildren() {
-		err = child.Eval()
+		dlci, err := child.Eval()
 		if err != nil {
-			return err
+			return "", err
 		}
+
+		// construct operands for execution
+		b.ExecData.Operands = append(b.ExecData.Operands, dlci)
 	}
 
 	// we've computed all dependencies, now lets eval this thang
-	err = b.Execute()
+	literal, err := b.Execute()
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return literal, nil
 }
 
 type Expr struct {
 	BaseAST
 	Name     string
 	Op       string
-	DLII     string
+	DLCI     string
 	Arity    int
 	Operands []AST
 	Args     map[string]AST
@@ -91,11 +94,6 @@ func NewExpr(name string) *Expr {
 
 type IfConditional struct{}
 
-func (c *IfConditional) Eval() error {
-
-	return nil
-}
-
 type Variable struct {
 	BaseAST
 	Literal
@@ -108,3 +106,10 @@ type Literal struct {
 	Type  string
 	Value interface{}
 }
+
+func (l *Literal) Eval() (DLCI, error) {
+
+	return l.Execute()
+}
+
+type DLCI string

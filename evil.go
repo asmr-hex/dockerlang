@@ -12,5 +12,6 @@ package dockerlang
 // Local, Args, Global
 
 func (c *Compterpreter) Evaluate() error {
-	return c.StackTree.Operands[0].Eval()
+	_, err := c.StackTree.Operands[0].Eval()
+	return err
 }

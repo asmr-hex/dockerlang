@@ -20,6 +20,10 @@ type ExecutionEngine struct {
 	Network    string
 }
 
+type ExecutionData struct {
+	Operands []DLCI
+}
+
 // constructs an ExecutionEngine and binds to the globally scoped executer.
 func NewExecutionEngine() error {
 	// set the API version to use in an environment variable
@@ -69,4 +73,12 @@ func ShutdownExecutionEngine() error {
 	}
 
 	return nil
+}
+
+func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
+	// start container with network name
+
+	// pass data structure needed to compute
+
+	return "", nil
 }
