@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	MEMORY_PORT = "6666"
+	DOCKERLANG_IMAGE = "dockerlang"
+	MEMORY_PORT      = "6666"
 
 	COMPUTATION_TYPE_ENV_VAR  = "COMPUTATION_TYPE_ENV_VAR"
 	COMPUTATION_VALUE_ENV_VAR = "COMPUTATION_VALUE_ENV_VAR"
@@ -75,6 +76,20 @@ func NewExecutionEngine() error {
 		return err
 	}
 
+	// create docker image from Dockerfile
+	// NOTE: this didn't work because of relative directories etc.
+	// _, err = executer.Docker.ImageBuild(
+	// 	context.TODO(),
+	// 	nil, // TODO what is this io.Reader about?
+	// 	types.ImageBuildOptions{
+	// 		Dockerfile: "../Dockerfile",
+	// 		Tags:       []string{DOCKERLANG_IMAGE},
+	// 	},
+	// )
+	// if err != nil {
+	// 	return err
+	// }
+
 	return nil
 }
 
@@ -88,23 +103,29 @@ func ShutdownExecutionEngine() error {
 	return nil
 }
 
+// construct the arguments to the computation about to be run and then create/start
+// a new docker container to perform the actual computation!
 func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
-	// start container with network name
-
-	// pass data structure needed to compute
+	// construct a comma delimited list of dockerlang container ids
+	// which we will pass to the container as an environment variable
 	dependencies := ""
-	for _, dep := range d.Operands {
-		dependencies += "," + string(dep)
+	for idx, dep := range d.Operands {
+		if idx > 0 {
+			dependencies += ","
+		}
+
+		dependencies += string(dep)
 	}
 
-	// create a DLCI (finally)
-	dlci := "cool"
+	// create the DockerLang Container Id for this computation
+	dlci := DLCI(uuid.NewV4().String())
 
-	e.Docker.ContainerCreate(
-		context.TODO(),
+	// create docker container for this computation
+	_, err := e.Docker.ContainerCreate(
+		context.TODO(), // i have no idea what this is or should be
 		&container.Config{
 			ExposedPorts: nat.PortSet{MEMORY_PORT: struct{}{}},
-			Image:        "dockerlang",
+			Image:        DOCKERLANG_IMAGE,
 			Env: []string{
 				fmt.Sprintf("%s=%s", COMPUTATION_TYPE_ENV_VAR, d.ComputationType),
 				fmt.Sprintf("%s=%s", COMPUTATION_VALUE_ENV_VAR, d.Value),
@@ -119,8 +140,22 @@ func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
 				},
 			},
 		},
-		dlci,
+		string(dlci),
 	)
+	if err != nil {
+		return "", err
+	}
 
-	return "", nil
+	// okay lets start the container...
+	err = e.Docker.ContainerStart(
+		context.TODO(),
+		string(dlci),
+		types.ContainerStartOptions{},
+	)
+	if err != nil {
+		return "", err
+	}
+
+	// lets return the DockerLang Container Id for this computation
+	return dlci, nil
 }

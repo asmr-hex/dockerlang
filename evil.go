@@ -1,5 +1,7 @@
 package dockerlang
 
+import "fmt"
+
 // receive a stack tree that only has a body AST set
 // Evaluation:
 // traverse the Body AST like a beautiful red sailboat, maintain reference to parent StackTree for lookups in scope
@@ -12,6 +14,9 @@ package dockerlang
 // Local, Args, Global
 
 func (c *Compterpreter) Evaluate() error {
-	_, err := c.StackTree.Operands[0].Eval()
+	r, err := c.StackTree.Operands[0].Eval()
+
+	fmt.Println(r)
+
 	return err
 }

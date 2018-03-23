@@ -2,83 +2,25 @@ package dockerlang
 
 // each function in Dockerlang will have its own StackTree of the form:
 //
-//              function StackTree
-//        _______________|_______________
-//       |          |          |         |
-//      args      global      local   body AST
-//      /\          /\         /\        \
-//    AST map    AST map  empty AST map   (AST of parsed code)
+//                          Expr
+//        ___________________|___________________
+//       |          |            |              |
+//      args      global        local        Operands
+//      /\          /\           /\             /\
+//    AST map    AST map   empty AST map   (ASTs of parsed code)
 
+// All nodes within the Abstract Syntax Tree we are parsing should be
+// sub ASTs which satisfy the interface{} AST which only requires that
+// we can evaluate that subtree. Importantly, the evaluation of all ASTs
+// will result a DockerLang Container Id which points to a memorycell
+// container which holds the value of the computation at that node.
 type AST interface {
 	Eval() (DLCI, error)
-	Execute() (DLCI, error)
-	GetChildren() []AST
 }
 
-// we should never actually instantiate this on its own
-// it should *always* be an embedded structure (this is a mixin)
-type BaseAST struct {
-	ExecData *ExecutionData
-}
-
-func (b *BaseAST) GetChildren() []AST {
-	return []AST{}
-}
-
-func (b *BaseAST) Execute() (DLCI, error) {
-	// actual docker
-
-	// but wait, what parts of the AST actually have their own containers?
-	// containers are like memory cells and DLCIs are like memory pointers,
-	// so anything we are storing in memory we will give its own docker container
-	// this means variables, expressions, and functions (which are basically just
-	// expressions) will have their own containers. Literals will not. The variable
-	// declaration operator will spin up an new unbound variable container while
-	// the variable assignment operator will set the value within that container.
-
-	// we will be using the docker golang api since docker is written
-	// in go and therefore we can just talk directly to docker through
-	// this code.
-
-	// OK before execution of anything, create a docker network
-
-	// pass computation data (some data structure we haven't decided on yet)
-	// for it to execute
-	return executer.Run(b.ExecData)
-}
-
-func (b *BaseAST) Eval() (DLCI, error) {
-	var (
-		err error
-	)
-
-	// we need to evaluate all child expressions in order
-	// to evaluate the current expression. So, evaluate
-	// all the child ASTs from left to right
-	for _, child := range b.GetChildren() {
-		dlci, err := child.Eval()
-		if err != nil {
-			return "", err
-		}
-
-		// construct operands for execution
-		b.ExecData.Operands = append(b.ExecData.Operands, dlci)
-	}
-
-	// we've computed all dependencies, now lets eval this thang
-	dlci, err := b.Execute()
-	if err != nil {
-		return "", err
-	}
-
-	return dlci, nil
-}
-
+// An Expr is an expression which satisfies the AST interface.
 type Expr struct {
-	BaseAST
-	Name     string
 	Op       string
-	DLCI     string
 	Arity    int
 	Operands []AST
 	Args     map[string]AST
@@ -86,30 +28,60 @@ type Expr struct {
 	Globals  map[string]AST
 }
 
-func NewExpr(name string) *Expr {
-	return &Expr{
-		Name: name,
+// evaluate an expression
+func (e *Expr) Eval() (DLCI, error) {
+	execData := &ExecutionData{
+		ComputationType: e.Op,
 	}
+
+	// we need to evaluate all child expressions in order
+	// to evaluate the current expression. So, evaluate
+	// all the child ASTs from left to right
+	for _, child := range e.Operands {
+		dlci, err := child.Eval()
+		if err != nil {
+			return "", err
+		}
+
+		// construct operands for execution
+		execData.Operands = append(execData.Operands, dlci)
+	}
+
+	// we've computed all dependencies, now lets eval this thang
+
+	return executer.Run(execData)
 }
 
+// TODO implement me. this should embed an Expr (since it has the same fields)
+// but is should overwrite the Eval function since it does that differently.
 type IfConditional struct{}
 
 type Variable struct {
-	BaseAST
 	Literal
 	Name  string
 	Bound bool
 }
 
+func (v *Variable) Eval() (DLCI, error) {
+	return executer.Run(
+		&ExecutionData{
+			ComputationType: VARIABLE,
+		},
+	)
+}
+
 type Literal struct {
-	BaseAST
 	Type  string
-	Value interface{}
+	Value string
 }
 
 func (l *Literal) Eval() (DLCI, error) {
-
-	return l.Execute()
+	return executer.Run(
+		&ExecutionData{
+			ComputationType: l.Type,
+			Value:           l.Value,
+		},
+	)
 }
 
 type DLCI string

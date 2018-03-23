@@ -44,7 +44,8 @@ func (c *Compterpreter) Compterpret() error {
 	)
 
 	// always shutdown the docker execution engine
-	defer ShutdownExecutionEngine()
+	// TODO uncomment the code below once we figure out a way to figure the below comment out.
+	// defer ShutdownExecutionEngine() // TODO kill this network only once all the containers have completed and been killed
 
 	// initialize a scanner to read through source code character
 	// by character

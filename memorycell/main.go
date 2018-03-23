@@ -31,9 +31,10 @@ func main() {
 	// get all the values this computation depends on
 	COMPUTATION_DEPENDENCIES = []string{}
 	for _, dlci := range COMPUTATION_DEPENDENCY_DLCIS {
-		if dlci != "" {
-			COMPUTATION_DEPENDENCIES = append(COMPUTATION_DEPENDENCIES, ExecuteDependency(dlci))
-		}
+		COMPUTATION_DEPENDENCIES = append(
+			COMPUTATION_DEPENDENCIES,
+			ExecuteDependency(dlci),
+		)
 	}
 
 	http.HandleFunc("/", ExecHandler)
@@ -60,20 +61,17 @@ func ExecHandler(w http.ResponseWriter, r *http.Request) {
 		input1, _ := strconv.Atoi(COMPUTATION_DEPENDENCIES[0])
 		input2, _ := strconv.Atoi(COMPUTATION_DEPENDENCIES[1])
 
-		result := input1 + input2
-		io.WriteString(w, string(result))
+		result := strconv.Itoa(input1 + input2)
+		io.WriteString(w, result)
 
 		os.Exit(0)
 	default:
 		// wtf is this type??????
 		panic("heeellllpppp")
 	}
-
-	fmt.Println("EXEC SOMETHING")
 }
 
 func KillHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("KILL ME")
 	os.Exit(0)
 }
 

@@ -41,7 +41,7 @@ func (c *Compterpreter) Parse() error {
 		opsStack  = NewStack()
 		exprStack = NewStack()
 	)
-	c.StackTree = NewExpr(c.Config.SrcFileName)
+	c.StackTree = &Expr{}
 
 	for _, token := range c.Tokens {
 		switch token.Type {

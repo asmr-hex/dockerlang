@@ -31,7 +31,6 @@ func (s *ParserSuite) TestParser() {
 	s.NoError(err)
 
 	expectedTree := &Expr{
-		Name: "src.doc",
 		Operands: []AST{
 			&Expr{
 				Op:    DIVISION_OPERATOR,

@@ -60,3 +60,6 @@ You will need to specify what you are listening to in your commits.
 ```bash
 git config commit.template .gitmessage
 ```
+
+quick links:
+https://docs.google.com/presentation/d/13wHMi0Mb7J9uZ9QnV3a96oC2IrjiCvsC_2Wo_MTDpNE/edit#slide=id.g357f0a1f59_0_16
