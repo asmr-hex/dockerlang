@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -36,7 +37,7 @@ type ExecutionEngine struct {
 type ExecutionData struct {
 	ComputationType string
 	Value           string
-	Operands        []DLCI
+	Operands        []string
 }
 
 // constructs an ExecutionEngine and binds to the globally scoped executer.
@@ -106,22 +107,15 @@ func ShutdownExecutionEngine() error {
 
 // construct the arguments to the computation about to be run and then create/start
 // a new docker container to perform the actual computation!
-func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
+func (e *ExecutionEngine) Run(d *ExecutionData) (string, error) {
 	var ctx = context.Background()
 
 	// construct a comma delimited list of dockerlang container ids
 	// which we will pass to the container as an environment variable
-	dependencies := ""
-	for idx, dep := range d.Operands {
-		if idx > 0 {
-			dependencies += ","
-		}
-
-		dependencies += string(dep)
-	}
+	dependencies := strings.Join(d.Operands, ",")
 
 	// create the DockerLang Container Id for this computation
-	dlci := DLCI(uuid.NewV4().String())
+	dlci := uuid.NewV4().String()
 
 	// create docker container for this computation
 	_, err := e.Docker.ContainerCreate(
@@ -145,7 +139,7 @@ func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
 				},
 			},
 		},
-		string(dlci),
+		dlci,
 	)
 	if err != nil {
 		return "", err
@@ -154,7 +148,7 @@ func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
 	// setup stdout stream from container
 	hijackedResp, err := e.Docker.ContainerAttach(
 		ctx,
-		string(dlci),
+		dlci,
 		types.ContainerAttachOptions{
 			Stream: true,
 			Stdout: true,
@@ -174,7 +168,7 @@ func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
 	// okay lets start the container...
 	err = e.Docker.ContainerStart(
 		ctx,
-		string(dlci),
+		dlci,
 		types.ContainerStartOptions{},
 	)
 	if err != nil {

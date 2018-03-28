@@ -15,7 +15,7 @@ package dockerlang
 // will result a DockerLang Container Id which points to a memorycell
 // container which holds the value of the computation at that node.
 type AST interface {
-	Eval() (DLCI, error)
+	Eval() (string, error)
 }
 
 // An Expr is an expression which satisfies the AST interface.
@@ -29,7 +29,7 @@ type Expr struct {
 }
 
 // evaluate an expression
-func (e *Expr) Eval() (DLCI, error) {
+func (e *Expr) Eval() (string, error) {
 	execData := &ExecutionData{
 		ComputationType: e.Op,
 	}
@@ -62,7 +62,7 @@ type Variable struct {
 	Bound bool
 }
 
-func (v *Variable) Eval() (DLCI, error) {
+func (v *Variable) Eval() (string, error) {
 	return executer.Run(
 		&ExecutionData{
 			ComputationType: VARIABLE,
@@ -75,7 +75,7 @@ type Literal struct {
 	Value string
 }
 
-func (l *Literal) Eval() (DLCI, error) {
+func (l *Literal) Eval() (string, error) {
 	return executer.Run(
 		&ExecutionData{
 			ComputationType: l.Type,
@@ -83,5 +83,3 @@ func (l *Literal) Eval() (DLCI, error) {
 		},
 	)
 }
-
-type DLCI string
