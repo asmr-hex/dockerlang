@@ -1,6 +1,11 @@
 package dockerlang
 
-import "fmt"
+import (
+	"fmt"
+
+	"context"
+	"github.com/docker/docker/api/types/container"
+)
 
 // receive a stack tree that only has a body AST set
 // Evaluation:
@@ -17,6 +22,19 @@ func (c *Compterpreter) Evaluate() error {
 	r, err := c.StackTree.Operands[0].Eval()
 
 	fmt.Println(r)
+
+	wait, errChan := executer.Docker.ContainerWait(
+		context.Background(),
+		r,
+		container.WaitConditionNotRunning,
+	)
+
+	select {
+	case <-wait:
+		// execution complete!
+	case err = <-errChan:
+		// uo oh
+	}
 
 	return err
 }

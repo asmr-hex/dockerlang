@@ -113,8 +113,8 @@ func (e *ExecutionEngine) Run(d *ExecutionData) (string, error) {
 	// construct a comma delimited list of dockerlang container ids
 	// which we will pass to the container as an environment variable
 	dependencies := strings.Join(d.Operands, ",")
-
 	// create the DockerLang Container Id for this computation
+
 	dlci := uuid.NewV4().String()
 
 	// create docker container for this computation
