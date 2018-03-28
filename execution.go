@@ -3,6 +3,7 @@ package dockerlang
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/docker/docker/api/types"
@@ -106,6 +107,8 @@ func ShutdownExecutionEngine() error {
 // construct the arguments to the computation about to be run and then create/start
 // a new docker container to perform the actual computation!
 func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
+	var ctx = context.Background()
+
 	// construct a comma delimited list of dockerlang container ids
 	// which we will pass to the container as an environment variable
 	dependencies := ""
@@ -122,7 +125,7 @@ func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
 
 	// create docker container for this computation
 	_, err := e.Docker.ContainerCreate(
-		context.TODO(), // i have no idea what this is or should be
+		ctx, // i have no idea what this is or should be
 		&container.Config{
 			ExposedPorts: nat.PortSet{MEMORY_PORT: struct{}{}},
 			Image:        DOCKERLANG_IMAGE,
@@ -131,6 +134,8 @@ func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
 				fmt.Sprintf("%s=%s", COMPUTATION_VALUE_ENV_VAR, d.Value),
 				fmt.Sprintf("%s=%s", COMPUTATION_DEPS_ENV_VAR, dependencies),
 			},
+			AttachStdout: true,
+			Tty:          true,
 		},
 		nil,
 		&network.NetworkingConfig{
@@ -146,9 +151,29 @@ func (e *ExecutionEngine) Run(d *ExecutionData) (DLCI, error) {
 		return "", err
 	}
 
+	// setup stdout stream from container
+	hijackedResp, err := e.Docker.ContainerAttach(
+		ctx,
+		string(dlci),
+		types.ContainerAttachOptions{
+			Stream: true,
+			Stdout: true,
+			Stderr: true,
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+
+	go func() {
+		defer hijackedResp.Close()
+
+		io.Copy(os.Stdout, hijackedResp.Reader)
+	}()
+
 	// okay lets start the container...
 	err = e.Docker.ContainerStart(
-		context.TODO(),
+		ctx,
 		string(dlci),
 		types.ContainerStartOptions{},
 	)

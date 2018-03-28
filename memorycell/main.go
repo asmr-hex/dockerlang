@@ -62,6 +62,7 @@ func ExecHandler(w http.ResponseWriter, r *http.Request) {
 		input2, _ := strconv.Atoi(COMPUTATION_DEPENDENCIES[1])
 
 		result := strconv.Itoa(input1 + input2)
+		fmt.Sprintf(result)
 		io.WriteString(w, result)
 
 		os.Exit(0)
