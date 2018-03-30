@@ -8,6 +8,7 @@ const (
 	MODULO_OPERATOR         = "%"
 	VARIABLE_INITIALIZATION = "≡"
 	VARIABLE_ASSIGNMENT     = "="
+	EXIT_OPERATOR           = "ꙮ"
 	NOOP                    = "NOOP"
 
 	R_PAREN_PUNCTION    = "("
@@ -23,6 +24,7 @@ var (
 		MODULO_OPERATOR:         2,
 		VARIABLE_INITIALIZATION: 1,
 		VARIABLE_ASSIGNMENT:     1,
+		EXIT_OPERATOR:           1,
 		NOOP:                    1,
 	}
 )
@@ -42,6 +44,7 @@ func PopulateSymbols() *Symbols {
 			MULTIPLICATION_OPERATOR,
 			DIVISION_OPERATOR,
 			MODULO_OPERATOR,
+			EXIT_OPERATOR,
 			NOOP,
 		},
 		Keywords: []string{},

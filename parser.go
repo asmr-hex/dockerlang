@@ -41,6 +41,8 @@ func (c *Compterpreter) Parse() error {
 		opsStack  = NewStack()
 		exprStack = NewStack()
 	)
+	// TODO make the root expression an EXIT_OPERATOR which will operate
+	// on all program roots.
 	c.StackTree = &Expr{}
 
 	for _, token := range c.Tokens {

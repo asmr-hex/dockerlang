@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/connorwalsh/dockerlang"
 )
@@ -17,6 +18,7 @@ type Computation struct {
 	Type         string
 	Value        string
 	Dependencies []string
+	Stop         chan struct{}
 }
 
 func NewComputation() *Computation {
@@ -24,13 +26,8 @@ func NewComputation() *Computation {
 		Type:         os.Getenv(dockerlang.COMPUTATION_TYPE_ENV_VAR),
 		Value:        os.Getenv(dockerlang.COMPUTATION_VALUE_ENV_VAR),
 		Dependencies: []string{},
+		Stop:         make(chan struct{}),
 	}
-
-	fmt.Printf(
-		"Dockerlang Memory Ready for Use (%s %s)...\n",
-		c.Type,
-		c.Value,
-	)
 
 	// get the computation type and value
 	depsEnvVar := os.Getenv(dockerlang.COMPUTATION_DEPS_ENV_VAR)
@@ -43,7 +40,6 @@ func NewComputation() *Computation {
 
 	// get all the values this computation depends on
 	for _, dlci := range computationDependencyDlcis {
-		fmt.Println("dep   ", dlci)
 		c.Dependencies = append(
 			c.Dependencies,
 			c.ExecuteDependency(dlci),
@@ -56,8 +52,17 @@ func NewComputation() *Computation {
 func main() {
 	// make a new cozy computation
 	c := NewComputation()
-	http.HandleFunc("/", c.ExecHandler)
+	http.HandleFunc("/", c.HttpExecHandler)
 	http.HandleFunc("/kill", c.KillHandler)
+
+	// exit is a special case where we automatically run the http response
+	if c.Type == dockerlang.EXIT_OPERATOR {
+		fmt.Println(c.ExecHandler())
+
+		return
+	}
+
+	go c.ListenForTermination()
 
 	log.Fatal(http.ListenAndServe(
 		fmt.Sprintf(":%s", dockerlang.MEMORY_PORT),
@@ -65,30 +70,48 @@ func main() {
 	))
 }
 
-func (c *Computation) ExecHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(c.Type, "exec handler")
-	switch c.Type {
-	case dockerlang.INT: // TODO refactor this into a constant
-		io.WriteString(w, c.Value)
-		fmt.Println("expect an int", c.Type, c.Value)
+// we need this because the http handlers need to return and we can't
+// directly os.Exit within them.
+func (c *Computation) ListenForTermination() {
+	select {
+	case <-c.Stop:
+		time.Sleep(1 * time.Second)
+		os.Exit(0)
+	}
+}
 
-		//os.Exit(0)
+func (c *Computation) ExecHandler() string {
+	switch c.Type {
+	case dockerlang.EXIT_OPERATOR:
+		return c.Dependencies[0]
+	case dockerlang.INT:
+		return c.Value
 	case dockerlang.ADDITION_OPERATOR:
 		input1, _ := strconv.Atoi(c.Dependencies[0])
 		input2, _ := strconv.Atoi(c.Dependencies[1])
 
 		result := strconv.Itoa(input1 + input2)
-		fmt.Println("expect addition", c.Type, result)
-		io.WriteString(w, result)
-
-		//os.Exit(0)
+		return result
 	default:
 		// wtf is this type??????
 		panic("heeellllpppp")
+
 	}
 }
 
+func (c *Computation) HttpExecHandler(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, c.ExecHandler())
+
+	switch c.Type {
+	// case dockerlang.VARIABLE:
+	default:
+		c.Stop <- struct{}{}
+	}
+
+}
+
 func (c *Computation) KillHandler(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(10 * time.Second)
 	os.Exit(0)
 }
 
@@ -97,11 +120,9 @@ func (c *Computation) ExecuteDependency(dlci string) string {
 		resultString string
 	)
 
-	fmt.Println("okay pretty basic  ", dlci)
 	resp, err := http.Get(
 		fmt.Sprintf("http://%s:%s/", dlci, dockerlang.MEMORY_PORT),
 	)
-	fmt.Println("shoulda got the resp")
 	if err != nil {
 		panic(err)
 	}

@@ -1,9 +1,8 @@
 package dockerlang
 
 import (
-	"fmt"
-
 	"context"
+
 	"github.com/docker/docker/api/types/container"
 )
 
@@ -20,8 +19,6 @@ import (
 
 func (c *Compterpreter) Evaluate() error {
 	r, err := c.StackTree.Operands[0].Eval()
-
-	fmt.Println(r)
 
 	wait, errChan := executer.Docker.ContainerWait(
 		context.Background(),
