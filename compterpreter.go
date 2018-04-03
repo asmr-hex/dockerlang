@@ -87,12 +87,27 @@ func (c *Compterpreter) LoadSourceCode() error {
 }
 
 func (c *Compterpreter) Interpret() error {
+	var (
+		err error
+	)
+
 	// Identifies tokens in the provided .doc code
-	c.Lex()
+	err = c.Lex()
+	if err != nil {
+		return err
+	}
+
 	// Creates c.StackTree representing the provided .doc code
-	c.Parse()
+	err = c.Parse()
+	if err != nil {
+		return err
+	}
+
 	// Actually dockerize and evaluate the StackTree
-	c.Evaluate()
+	err = c.Evaluate()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

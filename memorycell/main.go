@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -91,6 +92,36 @@ func (c *Computation) ExecHandler() string {
 		input2, _ := strconv.Atoi(c.Dependencies[1])
 
 		result := strconv.Itoa(input1 + input2)
+		return result
+	case dockerlang.SUBTRACTION_OPERATOR:
+		input1, _ := strconv.Atoi(c.Dependencies[0])
+		input2, _ := strconv.Atoi(c.Dependencies[1])
+
+		result := strconv.Itoa(input1 - input2)
+		return result
+	case dockerlang.MULTIPLICATION_OPERATOR:
+		input1, _ := strconv.Atoi(c.Dependencies[0])
+		input2, _ := strconv.Atoi(c.Dependencies[1])
+
+		result := strconv.Itoa(input1 * input2)
+		return result
+	case dockerlang.DIVISION_OPERATOR:
+		input1, _ := strconv.Atoi(c.Dependencies[0])
+		input2, _ := strconv.Atoi(c.Dependencies[1])
+
+		result := strconv.Itoa(input1 / input2)
+		return result
+	case dockerlang.MODULO_OPERATOR:
+		input1, _ := strconv.ParseFloat(c.Dependencies[0], 32)
+		input2, _ := strconv.ParseFloat(c.Dependencies[1], 32)
+
+		result := strconv.FormatFloat(
+			math.Mod(input1, input2),
+			'f',
+			-1,
+			32,
+		)
+
 		return result
 	default:
 		// wtf is this type??????
