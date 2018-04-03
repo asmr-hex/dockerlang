@@ -60,6 +60,19 @@ func (s *LexerSuite) TestIsOperator() {
 	}
 }
 
+func (s *LexerSuite) TestIsIdentifierFirstSymbol() {
+	conf := &Config{SrcFileName: "test/test.doc"}
+	compt := NewCompterpreter(conf)
+	for _, operator := range []rune{'a', 'A', 'z', 'Z', '_'} {
+		ok := compt.IsIdentifierFirstSymbol(operator)
+		s.True(ok)
+	}
+	for _, operator := range []rune{'❧', '0', ' '} {
+		ok := compt.IsIdentifierFirstSymbol(operator)
+		s.False(ok)
+	}
+}
+
 func (s *LexerSuite) TestIsPunctuation() {
 	conf := &Config{SrcFileName: "test/test.doc"}
 	compt := NewCompterpreter(conf)
@@ -83,6 +96,25 @@ func (s *LexerSuite) TestTokenizeOperator() {
 	compt.Advance()
 	// advance ptr to first character
 	for _, op := range []string{"‡", "*", "+", "%", "†"} {
+		compt.CurrentToken = Token{}
+		compt.TokenizeOperator(compt.CurrentChar)
+		if string(compt.CurrentChar) == "EOF" {
+			break
+		}
+		s.EqualValues(compt.CurrentToken.Value, op)
+	}
+}
+
+func (s *LexerSuite) TestTokenizeIdentifier() {
+	conf := &Config{SrcFileName: "test/test_identifiers.doc"}
+	compt := NewCompterpreter(conf)
+
+	err := compt.LoadSourceCode()
+	s.NoError(err)
+
+	compt.Advance()
+	// advance ptr to first character
+	for _, op := range []string{"myVariable"} {
 		compt.CurrentToken = Token{}
 		compt.TokenizeOperator(compt.CurrentChar)
 		if string(compt.CurrentChar) == "EOF" {

@@ -2,7 +2,8 @@ package dockerlang
 
 const (
 	OPERATOR    = "OPERATOR"
-	VARIABLE    = "VARIABLE"
+	IDENTIFIER  = "IDENTIFIER"
+	KEYWORD     = "KEYWORD"
 	INT         = "INTEGER"
 	PUNCTUATION = "PUNCTUATION" // parens
 )

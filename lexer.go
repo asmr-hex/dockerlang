@@ -51,6 +51,9 @@ func (c *Compterpreter) GetNextToken() (Token, error) {
 		case c.IsNumber(c.CurrentChar):
 			// get full multidigit number token
 			err = c.TokenizeNumber(c.CurrentChar)
+		case c.IsIdentifierFirstSymbol(c.CurrentChar):
+			// is it a keyword?
+			// is it a function/variable identifier?
 		case c.IsPunctuation(c.CurrentChar):
 			err = c.TokenizePunctuation(c.CurrentChar)
 		default:
@@ -80,6 +83,14 @@ func (c *Compterpreter) IsWhitespace(r rune) bool {
 
 func (c *Compterpreter) IsNumber(r rune) bool {
 	return unicode.IsDigit(r)
+}
+
+func (c *Compterpreter) IsIdentifierFirstSymbol(r rune) bool {
+	return VALID_IDENTIFIER_FIRST_SYMBOL.MatchString(string(r))
+}
+
+func (c *Compterpreter) IsIdentifier(r rune) bool {
+	return VALID_IDENTIFIER_SYMBOL.MatchString(string(r))
 }
 
 func (c *Compterpreter) IsOperator(r rune) bool {
@@ -131,6 +142,31 @@ func (c *Compterpreter) TokenizeNumber(r rune) error {
 
 	if c.IsNumber(c.CurrentChar) {
 		c.TokenizeNumber(c.CurrentChar)
+	}
+
+	return nil
+}
+
+func (c *Compterpreter) TokenizeIdentifier(r rune) error {
+	c.CurrentToken.Type = IDENTIFIER
+	c.CurrentToken.Value = c.CurrentToken.Value + string(r)
+
+	// check to see if we need to include the next character in the
+	// current token
+	if err := c.Advance(); err != nil {
+		return err
+	}
+
+	if c.IsIdentifier(c.CurrentChar) {
+		c.TokenizeIdentifier(c.CurrentChar)
+	}
+
+	// at this point, we have our current token, but we want to
+	// check whether it is a keyword of an identifier
+	for _, keyword := range c.Symbols.Keywords {
+		if c.CurrentToken.Value == keyword {
+			c.CurrentToken.Type = KEYWORD
+		}
 	}
 
 	return nil

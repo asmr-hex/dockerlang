@@ -28,6 +28,10 @@ type Expr struct {
 	Globals  map[string]AST
 }
 
+// def f():
+//   1 + 1
+//   return 2 + 2
+
 // evaluate an expression
 func (e *Expr) Eval() (string, error) {
 	execData := &ExecutionData{
@@ -65,7 +69,7 @@ type Variable struct {
 func (v *Variable) Eval() (string, error) {
 	return executer.Run(
 		&ExecutionData{
-			ComputationType: VARIABLE,
+			ComputationType: VARIABLE_IDENTIFIER,
 		},
 	)
 }

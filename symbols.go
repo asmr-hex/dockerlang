@@ -1,5 +1,7 @@
 package dockerlang
 
+import "regexp"
+
 const (
 	ADDITION_OPERATOR       = "+"
 	SUBTRACTION_OPERATOR    = "†"
@@ -13,6 +15,9 @@ const (
 
 	R_PAREN_PUNCTION    = "("
 	L_PAREN_PUNCUTATION = ")"
+
+	VARIABLE_IDENTIFIER = "VARIABLE_IDENTIFIER"
+	FUNCTION_IDENTIFIER = "FUNCTION_IDENTIFIER"
 )
 
 var (
@@ -27,6 +32,9 @@ var (
 		EXIT_OPERATOR:           1,
 		NOOP:                    1,
 	}
+
+	VALID_IDENTIFIER_FIRST_SYMBOL = regexp.MustCompile("[a-zA-Z_]")
+	VALID_IDENTIFIER_SYMBOL       = regexp.MustCompile("[a-zA-Z_\\d]")
 )
 
 // all the language-defined tokens in dockerlang
