@@ -124,6 +124,25 @@ func (s *LexerSuite) TestTokenizeIdentifier() {
 	}
 }
 
+func (s *LexerSuite) TestTokenizeIdentifier_Keyword() {
+	conf := &Config{SrcFileName: "test/test_identifiers_keyword.doc"}
+	compt := NewCompterpreter(conf)
+
+	err := compt.LoadSourceCode()
+	s.NoError(err)
+
+	compt.Advance()
+	// advance ptr to first character
+	for _, op := range []string{"if"} {
+		compt.CurrentToken = Token{}
+		compt.TokenizeIdentifier(compt.CurrentChar)
+		if string(compt.CurrentChar) == "EOF" {
+			break
+		}
+		s.EqualValues(compt.CurrentToken.Value, op)
+	}
+}
+
 func (s *LexerSuite) TestLex() {
 	conf := &Config{SrcFileName: "test/test_tokenize.doc"}
 	compt := NewCompterpreter(conf)

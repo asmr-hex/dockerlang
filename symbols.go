@@ -18,6 +18,9 @@ const (
 
 	VARIABLE_IDENTIFIER = "VARIABLE_IDENTIFIER"
 	FUNCTION_IDENTIFIER = "FUNCTION_IDENTIFIER"
+
+	IF_KEYWORD       = "if"
+	FUNCTION_KEYWORD = "❦"
 )
 
 var (
@@ -55,7 +58,10 @@ func PopulateSymbols() *Symbols {
 			EXIT_OPERATOR,
 			NOOP,
 		},
-		Keywords: []string{},
+		Keywords: []string{
+			IF_KEYWORD,
+			FUNCTION_KEYWORD,
+		},
 		Punctuation: []string{
 			R_PAREN_PUNCTION,
 			L_PAREN_PUNCUTATION,
