@@ -116,7 +116,7 @@ func (s *LexerSuite) TestTokenizeIdentifier() {
 	// advance ptr to first character
 	for _, op := range []string{"myVariable"} {
 		compt.CurrentToken = Token{}
-		compt.TokenizeOperator(compt.CurrentChar)
+		compt.TokenizeIdentifier(compt.CurrentChar)
 		if string(compt.CurrentChar) == "EOF" {
 			break
 		}

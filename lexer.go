@@ -54,6 +54,7 @@ func (c *Compterpreter) GetNextToken() (Token, error) {
 		case c.IsIdentifierFirstSymbol(c.CurrentChar):
 			// is it a keyword?
 			// is it a function/variable identifier?
+			err = c.TokenizeIdentifier(c.CurrentChar)
 		case c.IsPunctuation(c.CurrentChar):
 			err = c.TokenizePunctuation(c.CurrentChar)
 		default:

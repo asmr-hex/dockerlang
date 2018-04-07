@@ -1,7 +1,5 @@
 package dockerlang
 
-import "fmt"
-
 type Stack struct {
 	Elements []AST
 }
@@ -64,7 +62,6 @@ func (c *Compterpreter) Parse() error {
 				for i := 0; i < opsExpr.Arity; i++ {
 					// make sure we're not popping nil into exprs
 					if exprStack.Peek() == nil {
-						fmt.Println("1")
 						return DockerlangSyntaxError
 					}
 					opsExpr.Operands = append([]AST{exprStack.Pop()}, opsExpr.Operands...)
@@ -83,12 +80,9 @@ func (c *Compterpreter) Parse() error {
 		return DockerlangSyntaxError
 	}
 	if opsStack.Peek() != nil {
-		fmt.Println(opsStack.Peek())
 		// oh noooo!
 		return DockerlangSyntaxError
 	}
-
-	fmt.Println(exprStack)
 
 	c.StackTree.Operands = []AST{exprStack.Pop().(*Expr)}
 
