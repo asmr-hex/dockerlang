@@ -2,6 +2,8 @@ package dockerlang
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
 	"github.com/docker/docker/api/types/container"
 )
@@ -18,6 +20,15 @@ import (
 // Local, Args, Global
 
 func (c *Compterpreter) Evaluate() error {
+	b, _ := json.MarshalIndent(c.StackTree, "    ", "  ")
+	fmt.Println(string(b))
+
+	/*
+		for _, operand := range c.StackTree.Operands {
+			b, _ := json.MarshalIndent(operand, "    ", "  ")
+			fmt.Println(string(b))
+		}
+	*/
 	r, err := c.StackTree.Operands[0].Eval()
 
 	wait, errChan := executer.Docker.ContainerWait(

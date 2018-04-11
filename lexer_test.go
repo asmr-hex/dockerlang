@@ -140,6 +140,7 @@ func (s *LexerSuite) TestTokenizeIdentifier_Keyword() {
 			break
 		}
 		s.EqualValues(compt.CurrentToken.Value, op)
+		s.EqualValues(compt.CurrentToken.Type, KEYWORD)
 	}
 }
 
