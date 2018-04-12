@@ -3,7 +3,7 @@
 a turing complete language based on docker containers
 
 ## ❦ Contents
-- [How to use Dockerlang](##how-to-use-dockerlang)
+- [How to use Dockerlang](#how-to-use-dockerlang)
 - [Development guide](#development-guide)
 
 ---
@@ -24,10 +24,10 @@ If you want to print to standard out, use `!`, or to print to a string, put a st
 
 ### (In)variables
 
-Variables in Dockerlang are called `variable`s, and constants are `invariable`s. Here's how to declare a variable!
+Variables in Dockerlang are initialized with the `≡` symbol and assigned with `=`.
 ```dockerlang
-(variable x = 0)
-(invariable y = 'why")
+(≡ x 0)
+(= x 'why")
 ```
 
 Dockerlang doesn't worry about types and neither should you. Be free.
@@ -61,5 +61,22 @@ You will need to specify what you are listening to in your commits.
 git config commit.template .gitmessage
 ```
 
-quick links:
+### Docker commands you may find useful
+
+List docker containers current running:
+```bash
+docker ps
+```
+
+List docker networks:
+```bash
+docker network ls
+```
+
+Remove all exited docker containers:
+```bash
+docker rm $(docker ps -a --filter "status=exited" --format {{.ID}})
+```
+
+## Quick links:
 https://docs.google.com/presentation/d/13wHMi0Mb7J9uZ9QnV3a96oC2IrjiCvsC_2Wo_MTDpNE/edit#slide=id.g357f0a1f59_0_16
