@@ -52,7 +52,7 @@ func (c *Compterpreter) Parse() error {
 		if parenCount < 0 {
 			fmt.Println("UNBALANCED PARENS")
 			// TODO (cw,mr|4.11.2018) be more specific -____-
-			return DockerlangSyntaxError
+			return DockerlangSyntaxError("")
 		}
 
 		switch token.Type {
@@ -80,7 +80,7 @@ func (c *Compterpreter) Parse() error {
 				for i := 0; i < opsExpr.Arity; i++ {
 					// make sure we're not popping nil into exprs
 					if exprStack.Peek() == nil {
-						return DockerlangSyntaxError
+						return DockerlangSyntaxError("")
 					}
 					opsExpr.Operands = append([]AST{exprStack.Pop()}, opsExpr.Operands...)
 				}
@@ -101,7 +101,7 @@ func (c *Compterpreter) Parse() error {
 				fmt.Println(opsStack.Peek())
 				fmt.Println(exprStack.Peek())
 				// oh noooo!
-				return DockerlangSyntaxError
+				return DockerlangSyntaxError("")
 			}
 
 			// add this expression to the sequential list of expressions in the
@@ -119,7 +119,7 @@ func (c *Compterpreter) Parse() error {
 		fmt.Println(opsStack.Peek())
 		fmt.Println(exprStack.Peek())
 		// oh no!
-		return DockerlangSyntaxError
+		return DockerlangSyntaxError("")
 	}
 
 	return nil
@@ -152,7 +152,7 @@ func (e *Expr) ParseIdentifier(token Token, opsStack *Stack) (*Identifier, error
 		if !isDefined {
 			// TODO (cw,mr|4.11.2018) make this error more informative
 			fmt.Println("TRYING TO USE AN UNDEFINED THING")
-			return nil, DockerlangSyntaxError
+			return nil, DockerlangSyntaxError("")
 		}
 
 		// we are assuming that if an identifier is defined, then it is also bounded (or whatever)
@@ -164,7 +164,7 @@ func (e *Expr) ParseIdentifier(token Token, opsStack *Stack) (*Identifier, error
 	// we are trying to re-define this identifier
 	if isDefined {
 		fmt.Println("")
-		return nil, DockerlangSyntaxError
+		return nil, DockerlangSyntaxError("")
 	}
 
 	// actually define this identifier

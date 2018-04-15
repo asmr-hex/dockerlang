@@ -64,7 +64,7 @@ func (s *ParserSuite) TestParser_SyntaxError() {
 	}
 
 	err := compt.Parse()
-	s.EqualValues(err, DockerlangSyntaxError)
+	s.EqualValues(err, DockerlangSyntaxError(""))
 
 	compt.Tokens = []Token{
 		{Type: PUNCTUATION, Value: "("},
@@ -74,7 +74,7 @@ func (s *ParserSuite) TestParser_SyntaxError() {
 	}
 
 	err = compt.Parse()
-	s.EqualValues(err, DockerlangSyntaxError)
+	s.EqualValues(err, DockerlangSyntaxError(""))
 
 	compt.Tokens = []Token{
 		{Type: PUNCTUATION, Value: "("},
@@ -92,5 +92,5 @@ func (s *ParserSuite) TestParser_SyntaxError() {
 	}
 
 	err = compt.Parse()
-	s.EqualValues(err, DockerlangSyntaxError)
+	s.EqualValues(err, DockerlangSyntaxError(""))
 }
