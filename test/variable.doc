@@ -1,4 +1,3 @@
 (≡ aVariable 0)
-
-if asdf
-ifIamKewl
+(= aVariable 23)
+(ꙮ (+ aVariable 2))

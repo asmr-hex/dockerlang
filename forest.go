@@ -60,16 +60,16 @@ func (e *Expr) Eval() (string, error) {
 // but is should overwrite the Eval function since it does that differently.
 type IfConditional struct{}
 
-type Variable struct {
-	Literal
+type Identifier struct {
+	Type  string
 	Name  string
 	Bound bool
 }
 
-func (v *Variable) Eval() (string, error) {
+func (i *Identifier) Eval() (string, error) {
 	return executer.Run(
 		&ExecutionData{
-			ComputationType: VARIABLE_IDENTIFIER,
+			ComputationType: i.Type,
 		},
 	)
 }
