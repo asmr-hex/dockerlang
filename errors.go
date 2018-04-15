@@ -2,6 +2,7 @@ package dockerlang
 
 import (
 	"errors"
+	"strings"
 )
 
 var (
@@ -10,14 +11,16 @@ var (
 	//DockerlangSyntaxError  = errors.New("what that's not how you write dockerlang come on homie")
 )
 
-type errorString struct {
+type DockerlangSyntaxError struct {
 	s string
 }
 
-func (e errorString) Error() string {
+func (e DockerlangSyntaxError) Error() string {
 	return e.s
 }
 
-func DockerlangSyntaxError(text string) error {
-	return errorString{text}
+func SyntaxError(msgs ...string) error {
+	message := "Dockerlang syntex error "
+
+	return DockerlangSyntaxError{message + strings.Join(msgs, " ")}
 }
