@@ -60,6 +60,8 @@ func (e *Expr) Eval() (string, error) {
 // but is should overwrite the Eval function since it does that differently.
 type IfConditional struct{}
 
+// an Identifier can be a named expression which can either be a variable
+// or a function which is indicated by its Type.
 type Identifier struct {
 	Type  string
 	Name  string
