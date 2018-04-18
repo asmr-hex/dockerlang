@@ -2,7 +2,7 @@
 
 a turing complete language based on docker containers
 
-![alt text](https://github.com/connorwalsh/dockerlang/blob/dev/assets/dockerlang.gif)
+![alt text](https://github.com/connorwalsh/dockerlang/blob/dev/assets/dockerlang_glitch.gif)
 
 ## ❦ Contents
 - [How to use Dockerlang](#how-to-use-dockerlang)
