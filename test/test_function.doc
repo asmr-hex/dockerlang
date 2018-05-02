@@ -1,0 +1,9 @@
+
+
+(❦ add (arg1 arg2) (
+  (≡ a (+ arg1 arg2))
+  (return a)
+  ))
+
+(add 2 3)
+
