@@ -48,7 +48,7 @@ func (c *Compterpreter) Parse() error {
 	// on all program roots.
 	c.StackTree = &Expr{}
 
-	for _, token := range c.Tokens {
+	for idx, token := range c.Tokens {
 		if parenCount < 0 {
 			return SyntaxError("too many close parens", "current token:", string(token.Value))
 		}
@@ -69,19 +69,43 @@ func (c *Compterpreter) Parse() error {
 		case PUNCTUATION:
 			switch token.Value {
 			case "(":
-				// TODO: eventually check a puntaution stack for syntax checking
-				parenCount++
+				// push the open paren to the expression stack so we know when an expression
+				// or array is starting.
+				exprStack.Push(&Expr{Op: token.Value})
+
+                                // check to see if the next token is *not* an operator/keyword
+                                if idx + 1 < len(c.Tokens) {
+                                    nextToken := c.Tokens[idx+1]
+                                    
+                                    if nextToken.Type != OPERATOR && nextToken.Type != KEYWORD {
+                                        // add the implicit list operator to the ops stack since an
+                                        // open paren followed by a non-operator or keyword is assumed
+                                        // to be an array
+                                        opsStack.Push(&Expr{Op: IMPLICIT_LIST_OPERATOR, Arity: -1})
+                                    }
+                                }
 			case ")":
 				// shit gets real
 				var opsExpr = opsStack.Pop().(*Expr)
-				// pop a count of arity items off exprStack
-				for i := 0; i < opsExpr.Arity; i++ {
+                                for {
 					// make sure we're not popping nil into exprs
 					if exprStack.Peek() == nil {
 						return SyntaxError()
 					}
-					opsExpr.Operands = append([]AST{exprStack.Pop()}, opsExpr.Operands...)
-				}
+
+                                        // pop the expression off the expr stack
+                                        exp := exprStack.Pop()
+
+                                        // check whether this popped expression is an open paren
+                                        // if it is, stop the loop
+                                        if e, ok := exp.(*Expr); ok && e.Op == "(" {
+                                            break
+                                        }
+
+                                        // add this expression to the expression operands array`
+                                        opsExpr.Operands = append([]AST{exp, opsExpr.Operands...)
+                                }
+
 				// push modified ops expr onto the expr stack
 				exprStack.Push(opsExpr)
 

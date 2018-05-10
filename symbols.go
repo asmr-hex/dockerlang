@@ -11,6 +11,7 @@ const (
 	VARIABLE_INITIALIZATION = "≡"
 	VARIABLE_ASSIGNMENT     = "="
 	EXIT_OPERATOR           = "ꙮ"
+	IMPLICIT_LIST_OPERATOR  = "…"
 	NOOP                    = "NOOP"
 
 	R_PAREN_PUNCTION    = "("
@@ -58,6 +59,7 @@ func PopulateSymbols() *Symbols {
 			VARIABLE_INITIALIZATION,
 			VARIABLE_ASSIGNMENT,
 			EXIT_OPERATOR,
+			IMPLICIT_LIST_OPERATOR,
 			NOOP,
 		},
 		Keywords: []string{

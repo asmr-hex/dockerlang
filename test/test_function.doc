@@ -1,9 +1,8 @@
 
 
 (❦ add (arg1 arg2) (
-  (≡ a (+ arg1 arg2))
-  (return a)
+  (≡ x arg1)
+  (≡ y arg2)
+  (+ x (+ y 1))
   ))
-
-(add 2 3)
 

@@ -60,6 +60,65 @@ func (e *Expr) Eval() (string, error) {
 // but is should overwrite the Eval function since it does that differently.
 type IfConditional struct{}
 
+/*
+SOME NOTES (mr,cw|4.25.2018):
+
+------ define function ------
+(# add (x y) (+ x y))
+
+build an expression:
+{
+    Op: ?
+    Operands: [<sequential list of expressions in function>]
+    Locals: [local vars or functions]
+    Args: [x, y]
+}
+store that expression in Locals
+
+------ eval program --------
+(add 4 5)
+
+build an expression for our executed program:
+add
+/ \
+4  5
+
+
+{ Op: "add"
+  operands: [4, 5]
+}
+
+
+------
+
+locals
+add:
+ +
+/ \
+x  y -> args
+
+                  /|\
+                  \./
+              nnnnnnnnnnn
+             mm0m0m0m0m0m0m
+             m0m0m0m0m0m0mm
+             mmmmmmmmmmmmmm
+           ///            \\\
+         ////              \\\\
+        ////                \\\\
+         |||   ====   ====  |||
+          ||   (  )   (  )  ||
+           |        |       |
+           |        |       |
+            \      ( )     /
+             \   mmmmmmm  /
+              |   -----  |
+               \________/
+
+               welcome 2 dockerland
+
+*/
+
 // an Identifier can be a named expression which can either be a variable
 // or a function which is indicated by its Type.
 type Identifier struct {
